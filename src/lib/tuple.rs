@@ -1,7 +1,17 @@
-type Tuple = (f32, f32, f32, f32);
+struct Tuple {
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+}
 
 fn tuple(x: f32, y: f32, z: f32, w: f32) -> Tuple {
-    (x, y, z, w)
+    Tuple {
+        x: x,
+        y: y,
+        z: z,
+        w: w,
+    }
 }
 
 fn point(x: f32, y: f32, z: f32) -> Tuple {
@@ -13,12 +23,12 @@ fn vec(x: f32, y: f32, z: f32) -> Tuple {
 }
 
 // TODO: does w need an approximate comparison?
-fn is_point(x: Tuple) -> bool {
-    x.3 == 1.0
+fn is_point(x: &Tuple) -> bool {
+    x.w == 1.0
 }
 
-fn is_vec(x: Tuple) -> bool {
-    x.3 == 0.0
+fn is_vec(x: &Tuple) -> bool {
+    x.w == 0.0
 }
 
 #[cfg(test)]
@@ -28,11 +38,11 @@ mod tests {
     #[test]
     fn tuple_creation() {
         let a = point(4.3, -4.2, 3.1);
-        assert!(is_point(a));
-        assert!(!is_vec(a));
+        assert!(is_point(&a));
+        assert!(!is_vec(&a));
 
         let b = vec(4.3, -4.2, 3.1);
-        assert!(!is_point(b));
-        assert!(is_vec(b));
+        assert!(!is_point(&b));
+        assert!(is_vec(&b));
     }
 }
