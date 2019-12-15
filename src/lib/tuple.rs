@@ -45,6 +45,18 @@ impl Tuple {
     fn normalize(&self) -> Tuple {
         self / self.magnitude()
     }
+
+    fn dot(&self, other: &Tuple) -> f32 {
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+    }
+
+    fn cross(&self, other: &Tuple) -> Tuple {
+        // only implementing 3d version
+        Tuple::vec(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x)
+    }
 }
 
 impl PartialEq for Tuple {
@@ -153,17 +165,37 @@ mod tests {
         assert_eq!(1.0, Tuple::vec(1.0, 0.0, 0.0).magnitude());
         assert_eq!(1.0, Tuple::vec(0.0, 1.0, 0.0).magnitude());
         assert_eq!(1.0, Tuple::vec(0.0, 0.0, 1.0).magnitude());
+        assert_eq!(1.0, Tuple::point(0.0, 0.0, 1.0).magnitude());
 
         assert_eq!(14.0_f32.sqrt(), Tuple::vec(1.0, 2.0, 3.0).magnitude());
         assert_eq!(14.0_f32.sqrt(), Tuple::vec(-1.0, -2.0, -3.0).magnitude());
     }
 
     #[test]
-    fn tuple_normalization() {
+    fn vector_normalization() {
         let a = Tuple::vec(1.0, 1.0, 1.0);
         let b = Tuple::vec(1.0, 2.0, 3.0);
 
         assert!(approx_eq!(f32, 1.0, a.normalize().magnitude() ));
         assert!(approx_eq!(f32, 1.0, b.normalize().magnitude() ));
+        // TODO: can we normalize points? Do we need to worry about preserving the w value?
+        // assert_eq!(1.0, point.normalize().w);
+    }
+
+    #[test]
+    fn vector_dot_product() {
+        let a = Tuple::vec(1.0, 2.0, 3.0);
+        let b = Tuple::vec(2.0, 3.0, 4.0);
+
+        assert_eq!(20.0, Tuple::dot(&a, &b))
+    }
+
+    #[test]
+    fn vector_cross_product() {
+        let a = Tuple::vec(1.0, 2.0, 3.0);
+        let b = Tuple::vec(2.0, 3.0, 4.0);
+
+        assert_eq!(Tuple::vec(-1.0, 2.0, -1.0), Tuple::cross(&a, &b));
+        assert_eq!(Tuple::vec(1.0, -2.0, 1.0), Tuple::cross(&b, &a));
     }
 }
