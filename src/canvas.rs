@@ -7,6 +7,16 @@ pub trait Canvas {
     fn height(&self) -> usize;
     fn pixel_at(&self, x: usize, y: usize) -> &Color;
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize);
+    fn to_ppm(&self) -> String {
+        format!(
+            "P3
+{width} {height}
+255
+",
+            width = self.width(),
+            height = self.height()
+        )
+    }
 }
 
 pub struct TestCanvas {
@@ -59,6 +69,20 @@ macro_rules! canvas_tests {
             let mut c: $canvasType = Canvas::new(10, 10);
             c.write_pixel(&Color::red(), 2, 3);
             assert_eq!(&Color::red(), c.pixel_at(2, 3));
+        }
+
+        #[test]
+        fn can_create_basic_ppm_header() {
+            let c: $canvasType = Canvas::new(5, 3);
+            let ppm = c.to_ppm();
+            let lines = ppm.split("\n").collect::<Vec<&str>>();
+
+            // the first line specifies the type of netpbm file
+            assert_eq!("P3", lines[0]);
+            // the second line defines the size of the image
+            assert_eq!("5 3", lines[1]);
+            // the third line defines the maximum value of the pixel data
+            assert_eq!("255", lines[2]);
         }
     };
 }
