@@ -1,6 +1,6 @@
 extern crate float_cmp;
 use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
-use std::ops::{Add, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug)]
 struct Tuple {
@@ -36,6 +36,10 @@ impl Tuple {
     fn is_vec(&self) -> bool {
         self.w == 0.0
     }
+
+    fn magnitude(&self) -> f32 {
+        (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)).sqrt()
+    }
 }
 
 impl PartialEq for Tuple {
@@ -59,6 +63,8 @@ impl ApproxEq for Tuple {
     }
 }
 
+// TODO: use https://docs.rs/impl_ops/0.1.1/impl_ops/index.html to avoid some boilerplate here
+
 impl Add for Tuple {
     type Output = Tuple;
 
@@ -81,6 +87,40 @@ impl Sub for Tuple {
             self.y - other.y,
             self.z - other.z,
             self.w - other.w,
+        )
+    }
+}
+
+impl Neg for Tuple {
+    type Output = Tuple;
+
+    fn neg(self) -> Tuple {
+        Tuple::new(-self.x, -self.y, -self.z, -self.w)
+    }
+}
+
+impl Mul<f32> for Tuple {
+    type Output = Tuple;
+
+    fn mul(self, other: f32) -> Tuple {
+        Tuple::new(
+            self.x * other,
+            self.y * other,
+            self.z * other,
+            self.w * other,
+        )
+    }
+}
+
+impl Div<f32> for Tuple {
+    type Output = Tuple;
+
+    fn div(self, other: f32) -> Tuple {
+        Tuple::new(
+            self.x / other,
+            self.y / other,
+            self.z / other,
+            self.w / other,
         )
     }
 }
@@ -122,6 +162,7 @@ mod tests {
         assert_eq!(Tuple::new(1.0, 1.0, 6.0, 1.0), a + b)
     }
 
+    #[test]
     fn subtracting_tuples() {
         let a = Tuple::point(3.0, 2.0, 1.0);
         let b = Tuple::point(5.0, 6.0, 7.0);
@@ -129,4 +170,39 @@ mod tests {
         // subtracting two points gives a vector
         assert_eq!(Tuple::vec(-2.0, -4.0, -6.0), a - b)
     }
+
+    #[test]
+    fn negating_tuples() {
+        // negating a tuple doesn't negate the w value
+        assert_eq!(
+            -Tuple::point(1.0, 2.0, 3.0),
+            Tuple::new(-1.0, -2.0, -3.0, -1.0)
+        );
+        assert_eq!(-Tuple::vec(1.0, 2.0, 3.0), Tuple::vec(-1.0, -2.0, -3.0));
+    }
+
+    #[test]
+    fn scalar_multiplication_division() {
+        let a = Tuple::new(1.0, -2.0, 3.0, -4.0);
+
+        assert_eq!(Tuple::new(3.5, -7.0, 10.5, -14.0), a * 3.5);
+        // TODO: implement mul for references so this works too
+        // assert_eq!(Tuple::new(0.5, -1.0, 1.5, -2.0), a * 0.5);
+        // assert_eq!(Tuple::new(0.5, -1.0, 1.5, -2.0), a / 2.0);
+    }
+
+    #[test]
+    fn tuple_magnitude() {
+        assert_eq!(1.0, Tuple::vec(1.0, 0.0, 0.0).magnitude());
+        assert_eq!(1.0, Tuple::vec(0.0, 1.0, 0.0).magnitude());
+        assert_eq!(1.0, Tuple::vec(0.0, 0.0, 1.0).magnitude());
+
+        assert_eq!(14.0_f32.sqrt(), Tuple::vec(1.0, 2.0, 3.0).magnitude());
+        assert_eq!(14.0_f32.sqrt(), Tuple::vec(-1.0, -2.0, -3.0).magnitude());
+    }
+
+    // #[test]
+    // fn tuple_normalization() {
+    //     assert_eq!(1,  )
+    // }
 }
