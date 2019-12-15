@@ -33,6 +33,28 @@ impl Mul<&Tuple> for &Matrix4 {
     }
 }
 
+trait Submatrix {
+    type Output;
+
+    fn submatrix(self, row: usize, column: usize) -> Self::Output;
+}
+
+impl Submatrix for Matrix4 {
+    type Output = Matrix3;
+
+    fn submatrix(self, row: usize, column: usize) -> Matrix3 {
+        self.remove_row(row).remove_column(column)
+    }
+}
+
+impl Submatrix for Matrix3 {
+    type Output = Matrix2;
+
+    fn submatrix(self, row: usize, column: usize) -> Matrix2 {
+        self.remove_row(row).remove_column(column)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     // not really testing the library, just checking it behaves as we expect
@@ -112,5 +134,73 @@ mod tests {
         assert_eq!(Tuple::new(18., 24., 33., 1.), &a * &b);
 
         assert_eq!(b, &Matrix4::identity() * &b);
+    }
+
+    #[test]
+    fn transposing_a_matrix() {
+        let a = Matrix4::new(
+            0., 9., 3., 0., //
+            9., 8., 0., 8., //
+            1., 8., 5., 3., //
+            0., 0., 5., 8.,
+        );
+
+        let expected = Matrix4::new(
+            0., 9., 1., 0., //
+            9., 8., 8., 0., //
+            3., 0., 5., 5., //
+            0., 8., 3., 8.,
+        );
+
+        assert_eq!(expected, a.transpose());
+
+        assert_eq!(Matrix4::identity(), Matrix4::identity().transpose());
+    }
+
+    #[test]
+    fn finding_determinants() {
+        let a = Matrix2::new(
+            1., 5., //
+            -3., 2.,
+        );
+
+        assert_eq!(17., a.determinant());
+    }
+
+    #[test]
+    fn submatrixes() {
+        let a = Matrix3::new(
+            1., 5., 0., //
+            -3., 2., 7., //
+            0., 6., -3.,
+        );
+
+        let expected = Matrix2::new(
+            -3., 2., //
+            0., 6.,
+        );
+
+        assert_eq!(expected, a.submatrix(0, 2));
+
+        let b = Matrix4::new(
+            -6., 1., 1., 6., //
+            -8., 5., 8., 6., //
+            -1., 0., 8., 2., //
+            -7., 1., -1., 1.,
+        );
+
+        let expected2 = Matrix3::new(
+            -6., 1., 6., //
+            -8., 8., 6., //
+            -7., -1., 1.,
+        );
+
+        assert_eq!(expected2, b.submatrix(2, 1));
+    }
+
+    #[test]
+    #[ignore]
+    fn minors_cofactors_determinants_and_other_stuff() {
+        unimplemented!();
     }
 }
