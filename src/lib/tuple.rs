@@ -1,5 +1,6 @@
 extern crate float_cmp;
 use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
+use std::ops::Add;
 
 #[derive(Debug)]
 struct Tuple {
@@ -58,6 +59,19 @@ impl ApproxEq for Tuple {
     }
 }
 
+impl Add for Tuple {
+    type Output = Tuple;
+
+    fn add(self, other: Tuple) -> Tuple {
+        Tuple::new(
+            self.x + other.x,
+            self.y + other.y,
+            self.z + other.z,
+            self.w + other.w,
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -84,5 +98,13 @@ mod tests {
 
         assert_ne!(a, b);
         assert!(approx_eq!(Tuple, a, b))
+    }
+
+    #[test]
+    fn adding_tuples() {
+        let a = Tuple::new(3.0, -2.0, 5.0, 1.0);
+        let b = Tuple::new(-2.0, 3.0, 1.0, 0.0);
+
+        assert_eq!(Tuple::new(1.0, 1.0, 6.0, 1.0), a + b)
     }
 }
