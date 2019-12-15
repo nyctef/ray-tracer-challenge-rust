@@ -41,6 +41,10 @@ impl Tuple {
     fn magnitude(&self) -> f32 {
         (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)).sqrt()
     }
+
+    fn normalize(&self) -> Tuple {
+        self / self.magnitude()
+    }
 }
 
 impl PartialEq for Tuple {
@@ -154,8 +158,12 @@ mod tests {
         assert_eq!(14.0_f32.sqrt(), Tuple::vec(-1.0, -2.0, -3.0).magnitude());
     }
 
-    // #[test]
-    // fn tuple_normalization() {
-    //     assert_eq!(1,  )
-    // }
+    #[test]
+    fn tuple_normalization() {
+        let a = Tuple::vec(1.0, 1.0, 1.0);
+        let b = Tuple::vec(1.0, 2.0, 3.0);
+
+        assert!(approx_eq!(f32, 1.0, a.normalize().magnitude() ));
+        assert!(approx_eq!(f32, 1.0, b.normalize().magnitude() ));
+    }
 }
