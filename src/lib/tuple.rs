@@ -24,11 +24,11 @@ impl Tuple {
     }
 
     // TODO: does w need an approximate comparison?
-    fn is_point(self: &Tuple) -> bool {
+    fn is_point(&self) -> bool {
         self.w == 1.0
     }
 
-    fn is_vec(self: &Tuple) -> bool {
+    fn is_vec(&self) -> bool {
         self.w == 0.0
     }
 }
