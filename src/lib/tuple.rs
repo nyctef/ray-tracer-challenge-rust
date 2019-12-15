@@ -1,6 +1,6 @@
 extern crate float_cmp;
 use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[derive(Debug)]
 struct Tuple {
@@ -72,6 +72,19 @@ impl Add for Tuple {
     }
 }
 
+impl Sub for Tuple {
+    type Output = Tuple;
+
+    fn sub(self, other: Tuple) -> Tuple {
+        Tuple::new(
+            self.x - other.x,
+            self.y - other.y,
+            self.z - other.z,
+            self.w - other.w,
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -105,6 +118,15 @@ mod tests {
         let a = Tuple::new(3.0, -2.0, 5.0, 1.0);
         let b = Tuple::new(-2.0, 3.0, 1.0, 0.0);
 
+        // adding a point and a vector gives a point
         assert_eq!(Tuple::new(1.0, 1.0, 6.0, 1.0), a + b)
+    }
+
+    fn subtracting_tuples() {
+        let a = Tuple::point(3.0, 2.0, 1.0);
+        let b = Tuple::point(5.0, 6.0, 7.0);
+
+        // subtracting two points gives a vector
+        assert_eq!(Tuple::vec(-2.0, -4.0, -6.0), a - b)
     }
 }
