@@ -21,16 +21,22 @@ impl Canvas for TestCanvas {
     }
 }
 
+#[allow(unused_macros)]
+macro_rules! canvas_tests {
+    ($canvasType: ty) => {
+        #[test]
+        fn canvas_creation() {
+            let c: $canvasType = Canvas::new(30, 40);
+            assert_eq!(30, c.width());
+            assert_eq!(40, c.height());
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
-
-    use super::*;
-
-    #[test]
-    fn canvas_creation() {
-        let c: TestCanvas = Canvas::new(30, 40);
-
-        assert_eq!(30, c.width());
-        assert_eq!(40, c.height());
+    mod TestCanvas {
+        use super::super::*;
+        canvas_tests!(TestCanvas);
     }
 }
