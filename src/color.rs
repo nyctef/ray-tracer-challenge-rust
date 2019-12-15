@@ -4,7 +4,7 @@ use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
 
 use std::ops;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Color {
     pub r: f32,
     pub g: f32,
@@ -14,6 +14,10 @@ pub struct Color {
 impl Color {
     pub fn new(r: f32, g: f32, b: f32) -> Color {
         Color { r, g, b }
+    }
+
+    pub fn black() -> Color {
+        Color::new(0.0, 0.0, 0.0)
     }
 }
 
