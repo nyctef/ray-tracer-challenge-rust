@@ -1,6 +1,7 @@
 extern crate float_cmp;
 use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
-use std::ops::{Add, Div, Mul, Neg, Sub};
+
+use std::ops;
 
 #[derive(Debug)]
 struct Tuple {
@@ -63,67 +64,20 @@ impl ApproxEq for Tuple {
     }
 }
 
-// TODO: use https://docs.rs/impl_ops/0.1.1/impl_ops/index.html to avoid some boilerplate here
-
-impl Add for Tuple {
-    type Output = Tuple;
-
-    fn add(self, other: Tuple) -> Tuple {
-        Tuple::new(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z,
-            self.w + other.w,
-        )
-    }
-}
-
-impl Sub for Tuple {
-    type Output = Tuple;
-
-    fn sub(self, other: Tuple) -> Tuple {
-        Tuple::new(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z,
-            self.w - other.w,
-        )
-    }
-}
-
-impl Neg for Tuple {
-    type Output = Tuple;
-
-    fn neg(self) -> Tuple {
-        Tuple::new(-self.x, -self.y, -self.z, -self.w)
-    }
-}
-
-impl Mul<f32> for Tuple {
-    type Output = Tuple;
-
-    fn mul(self, other: f32) -> Tuple {
-        Tuple::new(
-            self.x * other,
-            self.y * other,
-            self.z * other,
-            self.w * other,
-        )
-    }
-}
-
-impl Div<f32> for Tuple {
-    type Output = Tuple;
-
-    fn div(self, other: f32) -> Tuple {
-        Tuple::new(
-            self.x / other,
-            self.y / other,
-            self.z / other,
-            self.w / other,
-        )
-    }
-}
+// using https://docs.rs/impl_ops/0.1.1/impl_ops/index.html to avoid lots of boilerplate here
+impl_op_ex!(+|a:&Tuple, b:&Tuple| -> Tuple { 
+    Tuple::new(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
+});
+impl_op_ex!(-|a: &Tuple, b: &Tuple| -> Tuple {
+    Tuple::new(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
+});
+impl_op_ex!(*|a:&Tuple, b:f32| -> Tuple { 
+    Tuple::new(a.x * b, a.y * b, a.z * b, a.w * b)
+});
+impl_op_ex!(/|a: &Tuple, b: f32| -> Tuple {
+    Tuple::new(a.x / b, a.y / b, a.z / b, a.w / b)
+});
+impl_op_ex!(-|a: &Tuple| -> Tuple { Tuple::new(-a.x, -a.y, -a.z, -a.w)});
 
 #[cfg(test)]
 mod tests {
@@ -185,10 +139,9 @@ mod tests {
     fn scalar_multiplication_division() {
         let a = Tuple::new(1.0, -2.0, 3.0, -4.0);
 
-        assert_eq!(Tuple::new(3.5, -7.0, 10.5, -14.0), a * 3.5);
-        // TODO: implement mul for references so this works too
-        // assert_eq!(Tuple::new(0.5, -1.0, 1.5, -2.0), a * 0.5);
-        // assert_eq!(Tuple::new(0.5, -1.0, 1.5, -2.0), a / 2.0);
+        assert_eq!(Tuple::new(3.5, -7.0, 10.5, -14.0), &a * 3.5);
+        assert_eq!(Tuple::new(0.5, -1.0, 1.5, -2.0), &a * 0.5);
+        assert_eq!(Tuple::new(0.5, -1.0, 1.5, -2.0), &a / 2.0);
     }
 
     #[test]
