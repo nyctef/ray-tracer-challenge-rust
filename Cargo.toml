@@ -4,7 +4,8 @@ version = "0.1.0"
 authors = ["nyctef <nyctef@nyctef.com>"]
 
 [lib]
-path ="./src/lib/lib.rs"
+name = "rtc"
+path ="./src/lib.rs"
 
 [dependencies]
 float-cmp = "0.6.0"

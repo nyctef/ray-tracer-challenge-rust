@@ -4,11 +4,11 @@ use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
 use std::ops;
 
 #[derive(Debug)]
-struct Tuple {
-    x: f32,
-    y: f32,
-    z: f32,
-    w: f32,
+pub struct Tuple {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
 }
 
 impl Tuple {
@@ -21,41 +21,42 @@ impl Tuple {
         }
     }
 
-    fn point(x: f32, y: f32, z: f32) -> Tuple {
+    pub fn point(x: f32, y: f32, z: f32) -> Tuple {
         Tuple::new(x, y, z, 1.0)
     }
 
-    fn vec(x: f32, y: f32, z: f32) -> Tuple {
+    pub fn vec(x: f32, y: f32, z: f32) -> Tuple {
         Tuple::new(x, y, z, 0.0)
     }
 
     // TODO: does w need an approximate comparison?
-    fn is_point(&self) -> bool {
+    pub fn is_point(&self) -> bool {
         self.w == 1.0
     }
 
-    fn is_vec(&self) -> bool {
+    pub fn is_vec(&self) -> bool {
         self.w == 0.0
     }
 
-    fn magnitude(&self) -> f32 {
+    pub fn magnitude(&self) -> f32 {
         (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)).sqrt()
     }
 
-    fn normalize(&self) -> Tuple {
+    pub fn normalize(&self) -> Tuple {
         self / self.magnitude()
     }
 
-    fn dot(&self, other: &Tuple) -> f32 {
+    pub fn dot(&self, other: &Tuple) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 
-    fn cross(&self, other: &Tuple) -> Tuple {
+    pub fn cross(&self, other: &Tuple) -> Tuple {
         // only implementing 3d version
         Tuple::vec(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
-            self.x * other.y - self.y * other.x)
+            self.x * other.y - self.y * other.x,
+        )
     }
 }
 
@@ -87,13 +88,11 @@ impl_op_ex!(+|a:&Tuple, b:&Tuple| -> Tuple {
 impl_op_ex!(-|a: &Tuple, b: &Tuple| -> Tuple {
     Tuple::new(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
 });
-impl_op_ex!(*|a:&Tuple, b:f32| -> Tuple { 
-    Tuple::new(a.x * b, a.y * b, a.z * b, a.w * b)
-});
+impl_op_ex!(*|a: &Tuple, b: f32| -> Tuple { Tuple::new(a.x * b, a.y * b, a.z * b, a.w * b) });
 impl_op_ex!(/|a: &Tuple, b: f32| -> Tuple {
     Tuple::new(a.x / b, a.y / b, a.z / b, a.w / b)
 });
-impl_op_ex!(-|a: &Tuple| -> Tuple { Tuple::new(-a.x, -a.y, -a.z, -a.w)});
+impl_op_ex!(-|a: &Tuple| -> Tuple { Tuple::new(-a.x, -a.y, -a.z, -a.w) });
 
 #[cfg(test)]
 mod tests {
@@ -176,8 +175,8 @@ mod tests {
         let a = Tuple::vec(1.0, 1.0, 1.0);
         let b = Tuple::vec(1.0, 2.0, 3.0);
 
-        assert!(approx_eq!(f32, 1.0, a.normalize().magnitude() ));
-        assert!(approx_eq!(f32, 1.0, b.normalize().magnitude() ));
+        assert!(approx_eq!(f32, 1.0, a.normalize().magnitude()));
+        assert!(approx_eq!(f32, 1.0, b.normalize().magnitude()));
         // TODO: can we normalize points? Do we need to worry about preserving the w value?
         // assert_eq!(1.0, point.normalize().w);
     }
