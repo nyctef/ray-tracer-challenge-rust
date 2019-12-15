@@ -19,6 +19,15 @@ impl Color {
     pub fn black() -> Color {
         Color::new(0.0, 0.0, 0.0)
     }
+    pub fn red() -> Color {
+        Color::new(1.0, 0.0, 0.0)
+    }
+
+    pub fn set(&mut self, other: &Color) {
+        self.r = other.r;
+        self.g = other.g;
+        self.b = other.b;
+    }
 }
 
 /// some magic to make ApproxEq work for Tuple

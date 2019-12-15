@@ -6,6 +6,7 @@ pub trait Canvas {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
     fn pixel_at(&self, x: usize, y: usize) -> &Color;
+    fn write_pixel(&mut self, c: &Color, x: usize, y: usize);
 }
 
 pub struct TestCanvas {
@@ -32,6 +33,9 @@ impl Canvas for TestCanvas {
     fn pixel_at(&self, x: usize, y: usize) -> &Color {
         &self.grid[x][y]
     }
+    fn write_pixel(&mut self, c: &Color, x: usize, y: usize) {
+        &self.grid[x][y].set(c);
+    }
 }
 
 #[allow(unused_macros)]
@@ -48,6 +52,13 @@ macro_rules! canvas_tests {
         fn uninitialized_pixel_is_black() {
             let c: $canvasType = Canvas::new(10, 10);
             assert_eq!(&Color::black(), c.pixel_at(3, 3));
+        }
+
+        #[test]
+        fn can_write_pixel_to_canvas() {
+            let mut c: $canvasType = Canvas::new(10, 10);
+            c.write_pixel(&Color::red(), 2, 3);
+            assert_eq!(&Color::red(), c.pixel_at(2, 3));
         }
     };
 }
