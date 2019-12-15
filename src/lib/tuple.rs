@@ -1,3 +1,7 @@
+extern crate float_cmp;
+use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
+
+#[derive(Debug)]
 struct Tuple {
     x: f32,
     y: f32,
@@ -33,6 +37,27 @@ impl Tuple {
     }
 }
 
+impl PartialEq for Tuple {
+    fn eq(&self, other: &Tuple) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w
+    }
+}
+
+/// some magic to make ApproxEq work for Tuple
+/// based on https://docs.rs/float-cmp/0.6.0/float_cmp/index.html
+/// TODO: come back and figure out how this works better
+impl ApproxEq for Tuple {
+    type Margin = F32Margin;
+
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
+        self.x.approx_eq(other.x, margin)
+            && self.y.approx_eq(other.y, margin)
+            && self.z.approx_eq(other.z, margin)
+            && self.w.approx_eq(other.w, margin)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -46,5 +71,18 @@ mod tests {
         let b = Tuple::vec(4.3, -4.2, 3.1);
         assert!(!b.is_point());
         assert!(b.is_vec());
+    }
+
+    #[test]
+    fn approx_equality() {
+        // using example from https://docs.rs/float-cmp/0.6.0/float_cmp/index.html#the-problem
+        // for some reason 0.1+0.2==0.3 works in rust
+        let x: f32 = 0.15 + 0.15 + 0.15;
+        let y: f32 = 0.1 + 0.1 + 0.25;
+        let a = Tuple::point(x, x, x);
+        let b = Tuple::point(y, y, y);
+
+        assert_ne!(a, b);
+        assert!(approx_eq!(Tuple, a, b))
     }
 }

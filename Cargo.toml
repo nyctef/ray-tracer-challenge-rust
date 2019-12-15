@@ -6,3 +6,6 @@ authors = ["VS Code <vscode@microsoft.com>"]
 [lib]
 path ="./src/lib/lib.rs"
 
+[dependencies]
+float-cmp = "0.6.0"
+
