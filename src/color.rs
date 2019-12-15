@@ -1,6 +1,6 @@
 extern crate float_cmp;
 
-use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
+use self::float_cmp::{ApproxEq, F32Margin};
 
 use std::ops;
 
@@ -57,6 +57,7 @@ impl_op_ex!(*|c1: &Color, x: f32| -> Color { Color::new(c1.r * x, c1.g * x, c1.b
 
 #[cfg(test)]
 mod tests {
+    use self::float_cmp::approx_eq;
     use super::*;
 
     #[test]

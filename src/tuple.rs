@@ -1,5 +1,5 @@
 extern crate float_cmp;
-use self::float_cmp::{approx_eq, ApproxEq, F32Margin};
+use self::float_cmp::{ApproxEq, F32Margin};
 
 use std::ops;
 
@@ -96,6 +96,7 @@ impl_op_ex!(-|a: &Tuple| -> Tuple { Tuple::new(-a.x, -a.y, -a.z, -a.w) });
 
 #[cfg(test)]
 mod tests {
+    use self::float_cmp::approx_eq;
     use super::*;
 
     #[test]
