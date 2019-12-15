@@ -5,30 +5,32 @@ struct Tuple {
     w: f32,
 }
 
-fn tuple(x: f32, y: f32, z: f32, w: f32) -> Tuple {
-    Tuple {
-        x: x,
-        y: y,
-        z: z,
-        w: w,
+impl Tuple {
+    fn new(x: f32, y: f32, z: f32, w: f32) -> Tuple {
+        Tuple {
+            x: x,
+            y: y,
+            z: z,
+            w: w,
+        }
     }
-}
 
-fn point(x: f32, y: f32, z: f32) -> Tuple {
-    tuple(x, y, z, 1.0)
-}
+    fn point(x: f32, y: f32, z: f32) -> Tuple {
+        Tuple::new(x, y, z, 1.0)
+    }
 
-fn vec(x: f32, y: f32, z: f32) -> Tuple {
-    tuple(x, y, z, 0.0)
-}
+    fn vec(x: f32, y: f32, z: f32) -> Tuple {
+        Tuple::new(x, y, z, 0.0)
+    }
 
-// TODO: does w need an approximate comparison?
-fn is_point(x: &Tuple) -> bool {
-    x.w == 1.0
-}
+    // TODO: does w need an approximate comparison?
+    fn is_point(self: &Tuple) -> bool {
+        self.w == 1.0
+    }
 
-fn is_vec(x: &Tuple) -> bool {
-    x.w == 0.0
+    fn is_vec(self: &Tuple) -> bool {
+        self.w == 0.0
+    }
 }
 
 #[cfg(test)]
@@ -37,12 +39,12 @@ mod tests {
 
     #[test]
     fn tuple_creation() {
-        let a = point(4.3, -4.2, 3.1);
-        assert!(is_point(&a));
-        assert!(!is_vec(&a));
+        let a = Tuple::point(4.3, -4.2, 3.1);
+        assert!(a.is_point());
+        assert!(!a.is_vec());
 
-        let b = vec(4.3, -4.2, 3.1);
-        assert!(!is_point(&b));
-        assert!(is_vec(&b));
+        let b = Tuple::vec(4.3, -4.2, 3.1);
+        assert!(!b.is_point());
+        assert!(b.is_vec());
     }
 }
