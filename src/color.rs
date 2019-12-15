@@ -1,7 +1,5 @@
 extern crate float_cmp;
-
 use self::float_cmp::{ApproxEq, F32Margin};
-
 use std::ops;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -27,6 +25,24 @@ impl Color {
         self.r = other.r;
         self.g = other.g;
         self.b = other.b;
+    }
+
+    pub fn clamp(&self) -> Color {
+        Color::new(
+            clamp(self.r, 0.0, 1.0),
+            clamp(self.g, 0.0, 1.0),
+            clamp(self.b, 0.0, 1.0),
+        )
+    }
+}
+
+fn clamp(value: f32, min: f32, max: f32) -> f32 {
+    if value < min {
+        min
+    } else if value > max {
+        max
+    } else {
+        value
     }
 }
 
@@ -85,5 +101,11 @@ mod tests {
         let c6 = Color::new(1.0, 0.2, 0.4);
         let c7 = Color::new(0.9, 1.0, 0.1);
         assert!(approx_eq!(Color, Color::new(0.9, 0.2, 0.04), c6 * c7));
+    }
+
+    #[test]
+    fn color_clamp() {
+        let c1 = Color::new(-0.5, 0.5, 1.5);
+        assert_eq!(Color::new(0.0, 0.5, 1.0), c1.clamp())
     }
 }

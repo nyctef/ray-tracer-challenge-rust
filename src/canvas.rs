@@ -8,13 +8,33 @@ pub trait Canvas {
     fn pixel_at(&self, x: usize, y: usize) -> &Color;
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize);
     fn to_ppm(&self) -> String {
+        let mut pixel_data = vec![vec!["0".to_string(); self.width()]; self.height()];
+
+        for y in 0..self.height() {
+            for x in 0..self.width() {
+                let p = self.pixel_at(x, y).clamp();
+                pixel_data[y][x] = format!(
+                    "{} {} {}",
+                    (p.r * 255.0).round(),
+                    (p.g * 255.0).round(),
+                    (p.b * 255.0).round()
+                )
+            }
+        }
+
         format!(
             "P3
 {width} {height}
 255
+{data}
 ",
             width = self.width(),
-            height = self.height()
+            height = self.height(),
+            data = pixel_data
+                .iter()
+                .map(|x| x.join(" "))
+                .collect::<Vec<_>>()
+                .join("\n")
         )
     }
 }
@@ -41,10 +61,10 @@ impl Canvas for TestCanvas {
         self.height
     }
     fn pixel_at(&self, x: usize, y: usize) -> &Color {
-        &self.grid[x][y]
+        &self.grid[y][x]
     }
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize) {
-        &self.grid[x][y].set(c);
+        &self.grid[y][x].set(c);
     }
 }
 
@@ -75,14 +95,47 @@ macro_rules! canvas_tests {
         fn can_create_basic_ppm_header() {
             let c: $canvasType = Canvas::new(5, 3);
             let ppm = c.to_ppm();
-            let lines = ppm.split("\n").collect::<Vec<&str>>();
+            let header_lines = ppm.split("\n").take(3).collect::<Vec<_>>();
 
             // the first line specifies the type of netpbm file
-            assert_eq!("P3", lines[0]);
+            assert_eq!("P3", header_lines[0]);
             // the second line defines the size of the image
-            assert_eq!("5 3", lines[1]);
+            assert_eq!("5 3", header_lines[1]);
             // the third line defines the maximum value of the pixel data
-            assert_eq!("255", lines[2]);
+            assert_eq!("255", header_lines[2]);
+        }
+
+        #[test]
+        fn can_write_ppm_pixel_data() {
+            let mut c: $canvasType = Canvas::new(5, 3);
+            let c1 = Color::new(1.5, 0.0, 0.0);
+            let c2 = Color::new(0.0, 0.5, 0.0);
+            let c3 = Color::new(-0.5, 0.0, 1.0);
+
+            c.write_pixel(&c1, 0, 0);
+            c.write_pixel(&c2, 2, 1);
+            c.write_pixel(&c3, 4, 2);
+
+            let ppm = c.to_ppm();
+            let data_lines = ppm.split("\n").skip(3).take(3).collect::<Vec<_>>();
+
+            assert_eq!("255 0 0 0 0 0 0 0 0 0 0 0 0 0 0", data_lines[0]);
+            assert_eq!("0 0 0 0 0 0 0 128 0 0 0 0 0 0 0", data_lines[1]);
+            assert_eq!("0 0 0 0 0 0 0 0 0 0 0 0 0 0 255", data_lines[2]);
+        }
+
+        #[test]
+        #[ignore]
+        fn ppm_pixel_data_wrapped_to_70_chars() {
+            unimplemented!();
+        }
+
+        #[test]
+        fn ppm_ends_with_newline_char() {
+            let c: $canvasType = Canvas::new(5, 3);
+            let ppm = c.to_ppm();
+
+            assert_eq!('\n', ppm.chars().last().unwrap());
         }
     };
 }
