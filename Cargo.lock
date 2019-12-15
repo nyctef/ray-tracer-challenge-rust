@@ -14,18 +14,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "hello_remote_world"
-version = "0.1.0"
-dependencies = [
- "float-cmp 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "num-traits"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "autocfg 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "ray-tracer-challenge"
+version = "0.1.0"
+dependencies = [
+ "float-cmp 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [metadata]
