@@ -20,6 +20,9 @@ impl Color {
     pub fn red() -> Color {
         Color::new(1.0, 0.0, 0.0)
     }
+    pub fn white() -> Color {
+        Color::new(1.0, 1.0, 1.0)
+    }
 
     pub fn set(&mut self, other: &Color) {
         self.r = other.r;

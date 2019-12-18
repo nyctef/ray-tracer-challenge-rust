@@ -2,46 +2,50 @@
 extern crate rtc;
 use rtc::canvas::{Canvas, TestCanvas};
 use rtc::color::Color;
+use rtc::transformations::{rotation_z, scaling, translation};
 use rtc::tuple::Tuple;
 use std::fs;
 
-#[derive(Debug)]
-struct Environment {
-    gravity: Tuple,
-    wind: Tuple,
-}
-
-#[derive(Debug)]
-struct Projectile {
-    position: Tuple,
-    velocity: Tuple,
-}
-
-fn tick(env: &Environment, proj: &Projectile) -> Projectile {
-    let position = &proj.position + &proj.velocity;
-    let velocity = &proj.velocity + &env.gravity + &env.wind;
-    Projectile { position, velocity }
+fn write_square<T: Canvas>(canvas: &mut T, color: &Color, x: usize, y: usize) {
+    let size = 2;
+    for x1 in 0..size {
+        for y1 in 0..size {
+            canvas.write_pixel(color, x + x1, y + y1);
+        }
+    }
 }
 
 fn main() {
-    let mut p = Projectile {
-        position: Tuple::point(0.0, 0.1, 0.0),
-        velocity: Tuple::vec(1.0, 1.8, 0.0).normalize() * 11.25,
-    };
-    let e = Environment {
-        gravity: Tuple::vec(0.0, -0.1, 0.0),
-        wind: Tuple::vec(-0.01, 0.0, 0.0),
-    };
-    let mut c = TestCanvas::new(900, 550);
+    let canvas_size = 50;
+    let mut c = TestCanvas::new(canvas_size, canvas_size);
 
-    while p.position.y > 0.0 {
-        println!("{:?}", p);
-        c.write_pixel(
-            &Color::red(),
-            p.position.x as usize,
-            549 - (p.position.y as usize),
+    let points = (0..12)
+        .map(|x| -> Tuple {
+            let rotation = rotation_z(((360. / 12.) * (x as f32)).to_radians());
+            &rotation * &Tuple::point(0., 1., 0.)
+        })
+        .map(|x| -> Tuple {
+            let scale = scaling(
+                canvas_size as f32 / 2. - 5.,
+                canvas_size as f32 / 2. - 5.,
+                0.,
+            );
+            &scale * &x
+        })
+        .map(|x| -> Tuple {
+            let centering = translation(canvas_size as f32 / 2., canvas_size as f32 / 2., 0.);
+            &centering * &x
+        })
+        .collect::<Vec<_>>();
+
+    println!("{:?}", points);
+
+    for point in points {
+        println!(
+            "Writing point at {:?} {:?}",
+            point.x as usize, point.y as usize
         );
-        p = tick(&e, &p);
+        write_square(&mut c, &Color::white(), point.x as usize, point.y as usize);
     }
 
     println!("Done");
