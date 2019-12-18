@@ -5,7 +5,7 @@ use shapes::Sphere;
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RaySphereIntersection {
     // the two values are the t parameter for the ray at the intersection point
-    Intersects(Intersection, Intersection),
+    Intersects([Intersection; 2]),
     Misses,
 }
 impl RayIntersection for Sphere {
@@ -27,10 +27,10 @@ impl RayIntersection for Sphere {
         let t1 = (-b - discriminant.sqrt()) / (2. * a);
         let t2 = (-b + discriminant.sqrt()) / (2. * a);
 
-        RaySphereIntersection::Intersects(
+        RaySphereIntersection::Intersects([
             Intersection::ray_sphere(self, t1),
             Intersection::ray_sphere(self, t2),
-        )
+        ])
     }
 }
 
@@ -48,10 +48,10 @@ mod tests {
         let r1 = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
         let i1 = s.ray_intersection(r1);
         assert_eq!(
-            Intersects(
+            Intersects([
                 Intersection::ray_sphere(s, 4.),
                 Intersection::ray_sphere(s, 6.)
-            ),
+            ]),
             i1
         );
 
@@ -59,10 +59,10 @@ mod tests {
         let r2 = Ray::new(Tuple::point(0., 1., -5.), Tuple::vec(0., 0., 1.));
         let i2 = s.ray_intersection(r2);
         assert_eq!(
-            Intersects(
+            Intersects([
                 Intersection::ray_sphere(s, 5.),
                 Intersection::ray_sphere(s, 5.)
-            ),
+            ]),
             i2
         );
 
@@ -75,10 +75,10 @@ mod tests {
         let r4 = Ray::new(Tuple::point(0., 0., 5.), Tuple::vec(0., 0., 1.));
         let i4 = s.ray_intersection(r4);
         assert_eq!(
-            Intersects(
+            Intersects([
                 Intersection::ray_sphere(s, -6.),
                 Intersection::ray_sphere(s, -4.)
-            ),
+            ]),
             i4
         );
     }
