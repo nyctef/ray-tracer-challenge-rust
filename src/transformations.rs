@@ -48,6 +48,16 @@ pub fn rotation_z(rad: f32) -> Matrix4 {
     )
 }
 
+#[rustfmt::skip]
+pub fn shearing(x_from_y: f32, x_from_z: f32, y_from_x: f32, y_from_z: f32, z_from_x: f32, z_from_y: f32) -> Matrix4 {
+    Matrix4::new(
+        1.,       x_from_y, x_from_z, 0.,
+        y_from_x, 1.,       y_from_z, 0.,
+        z_from_x, z_from_y, 1.,       0.,
+        0.,       0.,       0.,       1.,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     extern crate float_cmp;
@@ -172,5 +182,32 @@ mod tests {
             Tuple::point(-1., 0., 0.),
             &quarter_z_rotation * &p1
         ));
+    }
+
+    #[test]
+    fn shearing_moves_axes_in_proportion_to_each_other() {
+        let t1 = shearing(1., 0., 0., 0., 0., 0.);
+        let p1 = Tuple::point(2., 3., 4.);
+        assert_eq!(Tuple::point(5., 3., 4.), &t1 * &p1);
+
+        let t2 = shearing(0., 1., 0., 0., 0., 0.);
+        let p2 = Tuple::point(2., 3., 4.);
+        assert_eq!(Tuple::point(6., 3., 4.), &t2 * &p2);
+
+        let t3 = shearing(0., 0., 1., 0., 0., 0.);
+        let p3 = Tuple::point(2., 3., 4.);
+        assert_eq!(Tuple::point(2., 5., 4.), &t3 * &p3);
+
+        let t4 = shearing(0., 0., 0., 1., 0., 0.);
+        let p4 = Tuple::point(2., 3., 4.);
+        assert_eq!(Tuple::point(2., 7., 4.), &t4 * &p4);
+
+        let t5 = shearing(0., 0., 0., 0., 1., 0.);
+        let p5 = Tuple::point(2., 3., 4.);
+        assert_eq!(Tuple::point(2., 3., 6.), &t5 * &p5);
+
+        let t6 = shearing(0., 0., 0., 0., 0., 1.);
+        let p6 = Tuple::point(2., 3., 4.);
+        assert_eq!(Tuple::point(2., 3., 7.), &t6 * &p6);
     }
 }
