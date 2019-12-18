@@ -1,10 +1,11 @@
+use intersections::Intersection;
 use rays::{Ray, RayIntersection};
 use shapes::Sphere;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RaySphereIntersection {
     // the two values are the t parameter for the ray at the intersection point
-    Intersects(f32, f32),
+    Intersects(Intersection, Intersection),
     Misses,
 }
 impl RayIntersection for Sphere {
@@ -26,7 +27,10 @@ impl RayIntersection for Sphere {
         let t1 = (-b - discriminant.sqrt()) / (2. * a);
         let t2 = (-b + discriminant.sqrt()) / (2. * a);
 
-        RaySphereIntersection::Intersects(t1, t2)
+        RaySphereIntersection::Intersects(
+            Intersection::ray_sphere(self, t1),
+            Intersection::ray_sphere(self, t2),
+        )
     }
 }
 
@@ -43,12 +47,24 @@ mod tests {
         // normal hit
         let r1 = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
         let i1 = s.ray_intersection(r1);
-        assert_eq!(Intersects(4., 6.), i1);
+        assert_eq!(
+            Intersects(
+                Intersection::ray_sphere(s, 4.),
+                Intersection::ray_sphere(s, 6.)
+            ),
+            i1
+        );
 
         // tangent hit still produces two collision points
         let r2 = Ray::new(Tuple::point(0., 1., -5.), Tuple::vec(0., 0., 1.));
         let i2 = s.ray_intersection(r2);
-        assert_eq!(Intersects(5., 5.), i2);
+        assert_eq!(
+            Intersects(
+                Intersection::ray_sphere(s, 5.),
+                Intersection::ray_sphere(s, 5.)
+            ),
+            i2
+        );
 
         // missing entirely
         let r3 = Ray::new(Tuple::point(0., 2., -5.), Tuple::vec(0., 0., 1.));
@@ -58,6 +74,12 @@ mod tests {
         // a ray can intersect from behind its origin point
         let r4 = Ray::new(Tuple::point(0., 0., 5.), Tuple::vec(0., 0., 1.));
         let i4 = s.ray_intersection(r4);
-        assert_eq!(Intersects(-6., -4.), i4);
+        assert_eq!(
+            Intersects(
+                Intersection::ray_sphere(s, -6.),
+                Intersection::ray_sphere(s, -4.)
+            ),
+            i4
+        );
     }
 }

@@ -1,6 +1,6 @@
 use tuple::Tuple;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Sphere {
     pub center: Tuple,
     pub radius: f32,
