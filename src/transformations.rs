@@ -9,13 +9,35 @@ pub fn translation(x: f32, y: f32, z: f32) -> Matrix4 {
     )
 }
 
+pub fn scaling(x: f32, y: f32, z: f32) -> Matrix4 {
+    Matrix4::new(
+        x, 0., 0., 0., //
+        0., y, 0., 0., //
+        0., 0., z, 0., //
+        0., 0., 0., 1.,
+    )
+}
+
+#[rustfmt::skip]
+pub fn rotation_x(rad: f32) -> Matrix4 {
+    Matrix4::new(
+        1., 0., 0., 0.,
+        0., rad.cos(), -rad.sin(), 0.,
+        0., rad.sin(), rad.cos(), 0.,
+        0., 0., 0., 1.,
+    )
+}
+
 #[cfg(test)]
 mod tests {
+    extern crate float_cmp;
+    use self::float_cmp::approx_eq;
     use super::*;
     use crate::tuple::Tuple;
+    use std::f32::consts::PI;
 
     #[test]
-    fn multiplying_by_transformation_matrixes() {
+    fn translating_points_should_move_them() {
         let transform = translation(5., -3., 2.);
         let p = Tuple::point(-3., 4., 5.);
 
@@ -31,5 +53,48 @@ mod tests {
         let v = Tuple::vec(-3., 4., 5.);
 
         assert_eq!(v, &transform * &v);
+    }
+
+    #[test]
+    fn scaling_points_should_move_them() {
+        let transform = scaling(2., 3., 4.);
+        let p = Tuple::point(-4., 6., 8.);
+
+        assert_eq!(Tuple::point(-8., 18., 32.), &transform * &p);
+    }
+
+    #[test]
+    fn scaling_vectors_should_resize_them() {
+        let transform = scaling(2., 3., 4.);
+        let p = Tuple::vec(-4., 6., 8.);
+
+        assert_eq!(Tuple::vec(-8., 18., 32.), &transform * &p)
+    }
+
+    #[test]
+    fn rotation_around_x_axis() {
+        let p1 = Tuple::point(0., 1., 0.);
+
+        let half_quarter_x_rotation = rotation_x(PI / 4.);
+        let quarter_x_rotation = rotation_x(PI / 2.);
+        let half_root_2 = 2_f32.sqrt() / 2.;
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(0., half_root_2, half_root_2),
+            &half_quarter_x_rotation * &p1
+        ));
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(0., half_root_2, -half_root_2),
+            &(half_quarter_x_rotation.try_inverse().unwrap()) * &p1
+        ));
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(0., 0., 1.),
+            &quarter_x_rotation * &p1
+        ));
     }
 }
