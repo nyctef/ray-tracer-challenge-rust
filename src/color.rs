@@ -2,7 +2,7 @@ extern crate float_cmp;
 use self::float_cmp::{ApproxEq, F32Margin};
 use std::ops;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Color {
     pub r: f32,
     pub g: f32,

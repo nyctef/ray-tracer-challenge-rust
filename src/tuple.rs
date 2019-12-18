@@ -3,7 +3,7 @@ use self::float_cmp::{ApproxEq, F32Margin};
 
 use std::ops;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Tuple {
     pub x: f32,
     pub y: f32,
@@ -46,7 +46,7 @@ impl Tuple {
         self / self.magnitude()
     }
 
-    pub fn dot(&self, other: &Tuple) -> f32 {
+    pub fn dot(self, other: Tuple) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 
@@ -187,7 +187,7 @@ mod tests {
         let a = Tuple::vec(1.0, 2.0, 3.0);
         let b = Tuple::vec(2.0, 3.0, 4.0);
 
-        assert_eq!(20.0, Tuple::dot(&a, &b))
+        assert_eq!(20.0, Tuple::dot(a, b))
     }
 
     #[test]

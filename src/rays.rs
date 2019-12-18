@@ -21,10 +21,10 @@ impl Ray {
 trait RayIntersection {
     type OutputType;
 
-    fn ray_intersection(&self, ray: &Ray) -> Self::OutputType;
+    fn ray_intersection(self, ray: Ray) -> Self::OutputType;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     pub center: Tuple,
     pub radius: f32,
@@ -39,7 +39,7 @@ impl Sphere {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RaySphereIntersection {
     // the two values are the t parameter for the ray at the intersection point
     Intersects(f32, f32),
@@ -48,9 +48,9 @@ pub enum RaySphereIntersection {
 impl RayIntersection for Sphere {
     type OutputType = RaySphereIntersection;
 
-    fn ray_intersection(&self, ray: &Ray) -> RaySphereIntersection {
-        let sphere_to_ray = &(&ray.origin - &self.center);
-        let dir = &ray.direction;
+    fn ray_intersection(self, ray: Ray) -> RaySphereIntersection {
+        let sphere_to_ray = ray.origin - self.center;
+        let dir = ray.direction;
         let a = dir.dot(dir);
         let b = 2. * dir.dot(sphere_to_ray);
         let c = sphere_to_ray.dot(sphere_to_ray) - 1.;
@@ -97,25 +97,25 @@ pub mod tests {
 
     #[test]
     fn intersecting_rays_with_spheres() {
-        let s = &Sphere::unit();
+        let s = Sphere::unit();
 
         // normal hit
-        let r1 = &Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let r1 = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
         let i1 = s.ray_intersection(r1);
         assert_eq!(Intersects(4., 6.), i1);
 
         // tangent hit still produces two collision points
-        let r2 = &Ray::new(Tuple::point(0., 1., -5.), Tuple::vec(0., 0., 1.));
+        let r2 = Ray::new(Tuple::point(0., 1., -5.), Tuple::vec(0., 0., 1.));
         let i2 = s.ray_intersection(r2);
         assert_eq!(Intersects(5., 5.), i2);
 
         // missing entirely
-        let r3 = &Ray::new(Tuple::point(0., 2., -5.), Tuple::vec(0., 0., 1.));
+        let r3 = Ray::new(Tuple::point(0., 2., -5.), Tuple::vec(0., 0., 1.));
         let i3 = s.ray_intersection(r3);
         assert_eq!(Misses, i3);
 
         // a ray can intersect from behind its origin point
-        let r4 = &Ray::new(Tuple::point(0., 0., 5.), Tuple::vec(0., 0., 1.));
+        let r4 = Ray::new(Tuple::point(0., 0., 5.), Tuple::vec(0., 0., 1.));
         let i4 = s.ray_intersection(r4);
         assert_eq!(Intersects(-6., -4.), i4);
     }

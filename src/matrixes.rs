@@ -8,10 +8,10 @@ pub type Matrix3 = Matrix<f32, U3, U3, ArrayStorage<f32, U3, U3>>;
 pub type Matrix2 = Matrix<f32, U2, U2, ArrayStorage<f32, U2, U2>>;
 
 // TODO: should probably just replace custom Tuple type with nalgebra as well
-impl Mul<&Tuple> for &Matrix4 {
+impl Mul<Tuple> for Matrix4 {
     type Output = Tuple;
 
-    fn mul(self, other: &Tuple) -> Tuple {
+    fn mul(self, other: Tuple) -> Tuple {
         Tuple::new(
             self[(0, 0)] * other.x
                 + self[(0, 1)] * other.y
@@ -131,9 +131,9 @@ mod tests {
         );
         let b = Tuple::new(1., 2., 3., 1.);
 
-        assert_eq!(Tuple::new(18., 24., 33., 1.), &a * &b);
+        assert_eq!(Tuple::new(18., 24., 33., 1.), a * b);
 
-        assert_eq!(b, &Matrix4::identity() * &b);
+        assert_eq!(b, Matrix4::identity() * b);
     }
 
     #[test]

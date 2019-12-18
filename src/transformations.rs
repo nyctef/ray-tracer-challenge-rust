@@ -71,10 +71,10 @@ mod tests {
         let transform = translation(5., -3., 2.);
         let p = Tuple::point(-3., 4., 5.);
 
-        assert_eq!(Tuple::point(2., 1., 7.), &transform * &p);
+        assert_eq!(Tuple::point(2., 1., 7.), transform * p);
 
         let inv = transform.try_inverse().unwrap();
-        assert_eq!(Tuple::point(-8., 7., 3.), &inv * &p);
+        assert_eq!(Tuple::point(-8., 7., 3.), inv * p);
     }
 
     #[test]
@@ -82,7 +82,7 @@ mod tests {
         let transform = translation(5., -3., 2.);
         let v = Tuple::vec(-3., 4., 5.);
 
-        assert_eq!(v, &transform * &v);
+        assert_eq!(v, transform * v);
     }
 
     #[test]
@@ -90,7 +90,7 @@ mod tests {
         let transform = scaling(2., 3., 4.);
         let p = Tuple::point(-4., 6., 8.);
 
-        assert_eq!(Tuple::point(-8., 18., 32.), &transform * &p);
+        assert_eq!(Tuple::point(-8., 18., 32.), transform * p);
     }
 
     #[test]
@@ -98,7 +98,7 @@ mod tests {
         let transform = scaling(2., 3., 4.);
         let p = Tuple::vec(-4., 6., 8.);
 
-        assert_eq!(Tuple::vec(-8., 18., 32.), &transform * &p)
+        assert_eq!(Tuple::vec(-8., 18., 32.), transform * p)
     }
 
     #[test]
@@ -112,19 +112,19 @@ mod tests {
         assert!(approx_eq!(
             Tuple,
             Tuple::point(0., half_root_2, half_root_2),
-            &half_quarter_x_rotation * &p1
+            half_quarter_x_rotation * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
             Tuple::point(0., half_root_2, -half_root_2),
-            &(half_quarter_x_rotation.try_inverse().unwrap()) * &p1
+            (half_quarter_x_rotation.try_inverse().unwrap()) * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
             Tuple::point(0., 0., 1.),
-            &quarter_x_rotation * &p1
+            quarter_x_rotation * p1
         ));
     }
 
@@ -139,7 +139,7 @@ mod tests {
         assert!(approx_eq!(
             Tuple,
             Tuple::point(half_root_2, 0., half_root_2),
-            &half_quarter_y_rotation * &p1
+            half_quarter_y_rotation * p1
         ));
 
         // TODO: is this transformation not invertible?
@@ -152,7 +152,7 @@ mod tests {
         assert!(approx_eq!(
             Tuple,
             Tuple::point(1., 0., 0.),
-            &quarter_y_rotation * &p1
+            quarter_y_rotation * p1
         ));
     }
 
@@ -167,7 +167,7 @@ mod tests {
         assert!(approx_eq!(
             Tuple,
             Tuple::point(-half_root_2, half_root_2, 0.),
-            &half_quarter_z_rotation * &p1
+            half_quarter_z_rotation * p1
         ));
 
         // TODO: is this transformation not invertible?
@@ -180,7 +180,7 @@ mod tests {
         assert!(approx_eq!(
             Tuple,
             Tuple::point(-1., 0., 0.),
-            &quarter_z_rotation * &p1
+            quarter_z_rotation * p1
         ));
     }
 
@@ -188,26 +188,26 @@ mod tests {
     fn shearing_moves_axes_in_proportion_to_each_other() {
         let t1 = shearing(1., 0., 0., 0., 0., 0.);
         let p1 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(5., 3., 4.), &t1 * &p1);
+        assert_eq!(Tuple::point(5., 3., 4.), t1 * p1);
 
         let t2 = shearing(0., 1., 0., 0., 0., 0.);
         let p2 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(6., 3., 4.), &t2 * &p2);
+        assert_eq!(Tuple::point(6., 3., 4.), t2 * p2);
 
         let t3 = shearing(0., 0., 1., 0., 0., 0.);
         let p3 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 5., 4.), &t3 * &p3);
+        assert_eq!(Tuple::point(2., 5., 4.), t3 * p3);
 
         let t4 = shearing(0., 0., 0., 1., 0., 0.);
         let p4 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 7., 4.), &t4 * &p4);
+        assert_eq!(Tuple::point(2., 7., 4.), t4 * p4);
 
         let t5 = shearing(0., 0., 0., 0., 1., 0.);
         let p5 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 3., 6.), &t5 * &p5);
+        assert_eq!(Tuple::point(2., 3., 6.), t5 * p5);
 
         let t6 = shearing(0., 0., 0., 0., 0., 1.);
         let p6 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 3., 7.), &t6 * &p6);
+        assert_eq!(Tuple::point(2., 3., 7.), t6 * p6);
     }
 }

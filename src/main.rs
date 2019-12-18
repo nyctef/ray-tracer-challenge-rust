@@ -22,7 +22,7 @@ fn main() {
     let points = (0..12)
         .map(|x| -> Tuple {
             let rotation = rotation_z(((360. / 12.) * (x as f32)).to_radians());
-            &rotation * &Tuple::point(0., 1., 0.)
+            rotation * Tuple::point(0., 1., 0.)
         })
         .map(|x| -> Tuple {
             let scale = scaling(
@@ -30,11 +30,11 @@ fn main() {
                 canvas_size as f32 / 2. - 5.,
                 0.,
             );
-            &scale * &x
+            scale * x
         })
         .map(|x| -> Tuple {
             let centering = translation(canvas_size as f32 / 2., canvas_size as f32 / 2., 0.);
-            &centering * &x
+            centering * x
         })
         .collect::<Vec<_>>();
 
