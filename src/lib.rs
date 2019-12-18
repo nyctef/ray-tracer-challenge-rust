@@ -1,6 +1,7 @@
 pub mod canvas;
 pub mod color;
 pub mod matrixes;
+pub mod rays;
 pub mod transformations;
 pub mod tuple;
 
