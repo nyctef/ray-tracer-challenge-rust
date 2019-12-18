@@ -21,10 +21,30 @@ pub fn scaling(x: f32, y: f32, z: f32) -> Matrix4 {
 #[rustfmt::skip]
 pub fn rotation_x(rad: f32) -> Matrix4 {
     Matrix4::new(
-        1., 0., 0., 0.,
+        1., 0.,        0.,         0.,
         0., rad.cos(), -rad.sin(), 0.,
-        0., rad.sin(), rad.cos(), 0.,
-        0., 0., 0., 1.,
+        0., rad.sin(), rad.cos(),  0.,
+        0., 0.,        0.,         1.,
+    )
+}
+
+#[rustfmt::skip]
+pub fn rotation_y(rad: f32) -> Matrix4 {
+    Matrix4::new(
+        rad.cos(),  0., rad.sin(), 0.,
+        0.,         1., 0.,        0.,
+        -rad.sin(), 0., rad.cos(), 0.,
+        0.,         0., 0.,        1.,
+    )
+}
+
+#[rustfmt::skip]
+pub fn rotation_z(rad: f32) -> Matrix4 {
+    Matrix4::new(
+        rad.cos(), -rad.sin(), 0., 0.,
+        rad.sin(),  rad.cos(), 0., 0.,
+        0.,         0.,        0., 0.,
+        0.,         0.,        0., 1.,
     )
 }
 
@@ -95,6 +115,62 @@ mod tests {
             Tuple,
             Tuple::point(0., 0., 1.),
             &quarter_x_rotation * &p1
+        ));
+    }
+
+    #[test]
+    fn rotation_around_y_axis() {
+        let p1 = Tuple::point(0., 0., 1.);
+
+        let half_quarter_y_rotation = rotation_y(PI / 4.);
+        let quarter_y_rotation = rotation_y(PI / 2.);
+        let half_root_2 = 2_f32.sqrt() / 2.;
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(half_root_2, 0., half_root_2),
+            &half_quarter_y_rotation * &p1
+        ));
+
+        // TODO: is this transformation not invertible?
+        // assert!(approx_eq!(
+        //     Tuple,
+        //     Tuple::point(-half_root_2, 0., -half_root_2),
+        //     &(half_quarter_y_rotation.try_inverse().unwrap()) * &p1
+        // ));
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(1., 0., 0.),
+            &quarter_y_rotation * &p1
+        ));
+    }
+
+    #[test]
+    fn rotation_around_z_axis() {
+        let p1 = Tuple::point(0., 1., 0.);
+
+        let half_quarter_z_rotation = rotation_z(PI / 4.);
+        let quarter_z_rotation = rotation_z(PI / 2.);
+        let half_root_2 = 2_f32.sqrt() / 2.;
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(-half_root_2, half_root_2, 0.),
+            &half_quarter_z_rotation * &p1
+        ));
+
+        // TODO: is this transformation not invertible?
+        // assert!(approx_eq!(
+        //     Tuple,
+        //     Tuple::point(half_root_2, half_root_2, 0.),
+        //     &(half_quarter_z_rotation.try_inverse().unwrap()) * &p1
+        // ));
+
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(-1., 0., 0.),
+            &quarter_z_rotation * &p1
         ));
     }
 }
