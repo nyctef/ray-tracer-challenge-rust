@@ -21,4 +21,33 @@ impl Sphere {
                 * Matrix4::identity(),
         }
     }
+
+    // TODO: possible trait?
+    pub fn normal_at(&self, position: Tuple) -> Tuple {
+        Tuple::vec(position.x, position.y, position.z)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn normal_at_points_on_unit_sphere() {
+        let s = Sphere::unit();
+
+        // normal on x axis points in x direction
+        let n1 = s.normal_at(Tuple::point(1., 0., 0.));
+        assert_eq!(Tuple::vec(1., 0., 0.), n1);
+
+        let root_three_third = 3_f32.sqrt() / 3_f32;
+        let n2 = s.normal_at(Tuple::point(
+            root_three_third,
+            root_three_third,
+            root_three_third,
+        ));
+        assert_eq!(
+            Tuple::vec(root_three_third, root_three_third, root_three_third),
+            n2
+        );
+    }
 }
