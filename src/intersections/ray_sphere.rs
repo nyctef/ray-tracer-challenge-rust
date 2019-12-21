@@ -1,6 +1,7 @@
 use intersections::Intersection;
 use rays::{Ray, RayIntersection};
 use shapes::Sphere;
+use tuple::Tuple;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RaySphereIntersection {
@@ -12,7 +13,7 @@ impl RayIntersection for Sphere {
     type OutputType = RaySphereIntersection;
 
     fn ray_intersection(self, ray: Ray) -> RaySphereIntersection {
-        let sphere_to_ray = ray.origin - self.center;
+        let sphere_to_ray = ray.origin - Tuple::point(0., 0., 0.);
         let dir = ray.direction;
         let a = dir.dot(dir);
         let b = 2. * dir.dot(sphere_to_ray);

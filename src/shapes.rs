@@ -1,16 +1,14 @@
-use tuple::Tuple;
+use matrixes::Matrix4;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Sphere {
-    pub center: Tuple,
-    pub radius: f32,
+    pub transformation: Matrix4,
 }
 
 impl Sphere {
     pub fn unit() -> Sphere {
         Sphere {
-            center: Tuple::point(0., 0., 0.),
-            radius: 1.,
+            transformation: Matrix4::identity(),
         }
     }
 }
