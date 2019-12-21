@@ -13,8 +13,18 @@ impl RayIntersection for Sphere {
     type OutputType = RaySphereIntersection;
 
     fn ray_intersection(self, ray: Ray) -> RaySphereIntersection {
-        let sphere_to_ray = ray.origin - Tuple::point(0., 0., 0.);
-        let dir = ray.direction;
+        // we use the inverse of the sphere's transformation to move the ray
+        // into the sphere's object space
+        let inverse = match self.transformation.try_inverse() {
+            // TODO: some sort of warning for the failed inverse?
+            None => return RaySphereIntersection::Misses,
+            Some(x) => x,
+        };
+        let ray2 = inverse * ray;
+
+        // now we can intersect ray2 with the unit sphere
+        let sphere_to_ray = ray2.origin - Tuple::point(0., 0., 0.);
+        let dir = ray2.direction;
         let a = dir.dot(dir);
         let b = 2. * dir.dot(sphere_to_ray);
         let c = sphere_to_ray.dot(sphere_to_ray) - 1.;
@@ -42,7 +52,7 @@ mod tests {
     use crate::tuple::Tuple;
 
     #[test]
-    fn intersecting_rays_with_spheres() {
+    fn intersecting_rays_with_unit_spheres() {
         let s = Sphere::unit();
 
         // normal hit
@@ -82,5 +92,24 @@ mod tests {
             ]),
             i4
         );
+    }
+
+    #[test]
+    fn intersecting_rays_with_transformed_spheres() {
+        let r1 = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let s1 = Sphere::pos_r(Tuple::point(0., 0., 0.), 2.);
+        let i1 = s1.ray_intersection(r1);
+        assert_eq!(
+            Intersects([
+                Intersection::ray_sphere(s1, 3.),
+                Intersection::ray_sphere(s1, 7.)
+            ]),
+            i1
+        );
+
+        let r2 = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let s2 = Sphere::pos_r(Tuple::point(5., 0., 0.), 1.);
+        let i2 = s2.ray_intersection(r2);
+        assert_eq!(Misses, i2);
     }
 }

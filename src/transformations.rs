@@ -210,4 +210,16 @@ mod tests {
         let p6 = Tuple::point(2., 3., 4.);
         assert_eq!(Tuple::point(2., 3., 7.), t6 * p6);
     }
+
+    // #[test]
+    // fn sequencing_transformations() {
+    //     let t1 = scaling(3., 3., 3.);
+    //     let t2 = translation(1., 1., 1.);
+
+    //     let p1 = Tuple::point(1., 1., 0.);
+
+    //     println!("{:?}", t1 * t2 * p1);
+    //     println!("{:?}", t2 * t1 * p1);
+    //     panic!();
+    // }
 }
