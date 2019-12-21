@@ -2,50 +2,32 @@
 extern crate rtc;
 use rtc::canvas::{Canvas, TestCanvas};
 use rtc::color::Color;
+use rtc::intersections::ray_sphere::RaySphereIntersection::{Intersects, Misses};
+use rtc::rays::RayIntersection;
+use rtc::shapes::Sphere;
 use rtc::transformations::{rotation_z, scaling, translation};
 use rtc::tuple::Tuple;
+use rtc::*;
 use std::fs;
-
-fn write_square<T: Canvas>(canvas: &mut T, color: &Color, x: usize, y: usize) {
-    let size = 2;
-    for x1 in 0..size {
-        for y1 in 0..size {
-            canvas.write_pixel(color, x + x1, y + y1);
-        }
-    }
-}
 
 fn main() {
     let canvas_size = 50;
     let mut c = TestCanvas::new(canvas_size, canvas_size);
 
-    let points = (0..12)
-        .map(|x| -> Tuple {
-            let rotation = rotation_z(((360. / 12.) * (x as f32)).to_radians());
-            rotation * Tuple::point(0., 1., 0.)
-        })
-        .map(|x| -> Tuple {
-            let scale = scaling(
-                canvas_size as f32 / 2. - 5.,
-                canvas_size as f32 / 2. - 5.,
-                0.,
+    let sphere = Sphere::pos_r(Tuple::point(25., 25., 0.), 20.);
+
+    for x in 0..canvas_size {
+        for y in 0..canvas_size {
+            let ray = rays::Ray::new(
+                Tuple::point(x as f32, y as f32, -50.),
+                Tuple::vec(0., 0., 1.),
             );
-            scale * x
-        })
-        .map(|x| -> Tuple {
-            let centering = translation(canvas_size as f32 / 2., canvas_size as f32 / 2., 0.);
-            centering * x
-        })
-        .collect::<Vec<_>>();
-
-    println!("{:?}", points);
-
-    for point in points {
-        println!(
-            "Writing point at {:?} {:?}",
-            point.x as usize, point.y as usize
-        );
-        write_square(&mut c, &Color::white(), point.x as usize, point.y as usize);
+            let intersects = sphere.ray_intersection(ray);
+            match intersects {
+                Misses => c.write_pixel(&Color::black(), x, y),
+                Intersects(_) => c.write_pixel(&Color::red(), x, y),
+            }
+        }
     }
 
     println!("Done");
