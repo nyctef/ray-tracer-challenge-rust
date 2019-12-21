@@ -1,4 +1,4 @@
-use color::Color;
+use crate::*;
 use std::vec::Vec;
 
 pub trait Canvas {

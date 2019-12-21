@@ -1,7 +1,4 @@
-use intersections::Intersection;
-use rays::{Ray, RayIntersection};
-use shapes::Sphere;
-use tuple::Tuple;
+use crate::*;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RaySphereIntersection {
@@ -49,7 +46,6 @@ impl RayIntersection for Sphere {
 mod tests {
     use super::RaySphereIntersection::*;
     use super::*;
-    use crate::tuple::Tuple;
 
     #[test]
     fn intersecting_rays_with_unit_spheres() {

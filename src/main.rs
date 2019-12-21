@@ -1,12 +1,6 @@
 // TODO: should this extern crate still be required?
 extern crate rtc;
-use rtc::canvas::{Canvas, TestCanvas};
-use rtc::color::Color;
-use rtc::intersections::ray_sphere::RaySphereIntersection::{Intersects, Misses};
-use rtc::rays::RayIntersection;
-use rtc::shapes::Sphere;
-use rtc::transformations::{rotation_z, scaling, translation};
-use rtc::tuple::Tuple;
+use rtc::RaySphereIntersection::*;
 use rtc::*;
 use std::fs;
 
@@ -18,7 +12,7 @@ fn main() {
 
     for x in 0..canvas_size {
         for y in 0..canvas_size {
-            let ray = rays::Ray::new(
+            let ray = Ray::new(
                 Tuple::point(x as f32, y as f32, -50.),
                 Tuple::vec(0., 0., 1.),
             );

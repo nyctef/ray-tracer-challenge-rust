@@ -1,6 +1,7 @@
-pub mod ray_sphere;
+mod ray_sphere;
+pub use self::ray_sphere::*;
 
-use shapes::Sphere;
+use crate::*;
 use std::cmp::Ordering::Equal;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
