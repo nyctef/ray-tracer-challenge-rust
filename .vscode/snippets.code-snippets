@@ -17,12 +17,30 @@
   // }
   "rtest": {
     "prefix": "rtest",
-    "body": ["#[test]", "fn ${1:name}() {", "    ${2:unimplemented!();}", "}"],
+    "body": [
+      "#[test]",
+      "fn ${1:name}() {",
+      "    ${2:unimplemented!();}",
+      "}"
+    ],
     "description": "#[test]"
+  },
+  "rtests": {
+    "prefix": "rtests",
+    "body": [
+      "#[cfg(test)]",
+      "mod tests {",
+      "    use super::*;",
+      "    $0",
+      "}"
+    ],
+    "description": "module tests"
   },
   "aeq": {
     "prefix": "aeq",
-    "body": ["assert_eq!($1, $2)$0"],
+    "body": [
+      "assert_eq!($1, $2)$0"
+    ],
     "description": "Insert assert_eq!"
   }
 }
