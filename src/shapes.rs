@@ -54,25 +54,10 @@ mod tests {
     // (code crudely copied from https://doc.rust-lang.org/src/core/macros.rs.html#78-111)
     // TODO: use this macro more widely
     macro_rules! assert_tuple_eq {
-        ($left:expr, $right:expr) => {{
+        ($left:expr, $right:expr $(, $set:ident = $val:expr)*) => {{
             match (&$left, &$right) {
                 (left_val, right_val) => {
-                    if !approx_eq!(Tuple, *left_val, *right_val) {
-                        panic!(
-                            r#"assertion failed: `(left approxEquals right)`
-   left: `{:?}`
-  right: `{:?}`"#,
-                            &*left_val, &*right_val
-                        );
-                    }
-                }
-            }
-        }};
-        // TODO: figure out if there's a nice way to dedupe these cases
-        ($left:expr, $right:expr, $epsilon:expr) => {{
-            match (&$left, &$right) {
-                (left_val, right_val) => {
-                    if !approx_eq!(Tuple, *left_val, *right_val, epsilon = $epsilon) {
+                    if !approx_eq!(Tuple, *left_val, *right_val $(, $set = $val)*) {
                         panic!(
                             r#"assertion failed: `(left approxEquals right)`
    left: `{:?}`
@@ -104,11 +89,11 @@ mod tests {
         let n1 = s1.normal_at(Tuple::point(0., 1.707111, -0.70711));
         // TODO: is it possible to figure out if this is a sensible epsilon?
         // is there more precision we should be preserving?
-        assert_tuple_eq!(n1, Tuple::vec(0., 0.70711, -0.70711), 0.0001);
+        assert_tuple_eq!(n1, Tuple::vec(0., 0.70711, -0.70711), epsilon = 0.0001);
 
         let s2 = Sphere::new(scaling(1., 0.5, 1.) * rotation_z(PI / 5.));
         let s22 = 2_f32.sqrt() / 2.;
         let n2 = s2.normal_at(Tuple::point(0., s22, -s22));
-        assert_tuple_eq!(n2, Tuple::vec(0., 0.97014, -0.24254));
+        assert_tuple_eq!(n2, Tuple::vec(0., 0.97014, -0.24254), epsilon = 0.00001);
     }
 }
