@@ -1,5 +1,4 @@
-use crate::matrixes::Matrix4;
-use crate::tuple::Tuple;
+use crate::*;
 use std::ops::Mul;
 
 #[derive(Debug)]
@@ -32,6 +31,12 @@ impl Mul<Ray> for Matrix4 {
     fn mul(self, other: Ray) -> Ray {
         Ray::new(self * other.origin, self * other.direction)
     }
+}
+
+pub fn reflect(vector: Tuple, normal: Tuple) -> Tuple {
+    assert!(vector.is_vec());
+    assert!(normal.is_vec());
+    vector - normal * 2. * vector.dot(normal)
 }
 
 #[cfg(test)]
@@ -79,5 +84,17 @@ pub mod tests {
 
         assert_eq!(Tuple::point(2., 6., 12.), r2.origin);
         assert_eq!(Tuple::vec(0., 3., 0.), r2.direction);
+    }
+
+    #[test]
+    fn reflecting_a_vector() {
+        let v = Tuple::vec(1., -1., 0.);
+        let n = Tuple::vec(0., 1., 0.);
+        assert_tuple_eq!(Tuple::vec(1., 1., 0.), reflect(v, n));
+
+        let v2 = Tuple::vec(0., -1., 0.);
+        let s22 = 2_f32.sqrt() / 2.;
+        let n2 = Tuple::vec(s22, s22, 0.);
+        assert_tuple_eq!(Tuple::vec(1., 0., 0.), reflect(v2, n2));
     }
 }
