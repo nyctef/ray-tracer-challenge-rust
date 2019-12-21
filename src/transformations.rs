@@ -142,12 +142,11 @@ mod tests {
             half_quarter_y_rotation * p1
         ));
 
-        // TODO: is this transformation not invertible?
-        // assert!(approx_eq!(
-        //     Tuple,
-        //     Tuple::point(-half_root_2, 0., -half_root_2),
-        //     &(half_quarter_y_rotation.try_inverse().unwrap()) * &p1
-        // ));
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(-half_root_2, 0., half_root_2),
+            half_quarter_y_rotation.try_inverse().unwrap() * p1
+        ));
 
         assert!(approx_eq!(
             Tuple,
