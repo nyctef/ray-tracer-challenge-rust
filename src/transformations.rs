@@ -43,7 +43,7 @@ pub fn rotation_z(rad: f32) -> Matrix4 {
     Matrix4::new(
         rad.cos(), -rad.sin(), 0., 0.,
         rad.sin(),  rad.cos(), 0., 0.,
-        0.,         0.,        0., 0.,
+        0.,         0.,        1., 0.,
         0.,         0.,        0., 1.,
     )
 }
@@ -170,12 +170,11 @@ mod tests {
             half_quarter_z_rotation * p1
         ));
 
-        // TODO: is this transformation not invertible?
-        // assert!(approx_eq!(
-        //     Tuple,
-        //     Tuple::point(half_root_2, half_root_2, 0.),
-        //     &(half_quarter_z_rotation.try_inverse().unwrap()) * &p1
-        // ));
+        assert!(approx_eq!(
+            Tuple,
+            Tuple::point(half_root_2, half_root_2, 0.),
+            half_quarter_z_rotation.try_inverse().unwrap() * p1
+        ));
 
         assert!(approx_eq!(
             Tuple,
