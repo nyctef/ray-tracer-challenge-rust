@@ -1,3 +1,8 @@
+#[macro_use]
+mod asserts;
+pub use asserts::*;
+
+pub use asserts::*;
 mod canvas;
 pub use canvas::*;
 mod color;
