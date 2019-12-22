@@ -20,3 +20,21 @@ macro_rules! assert_tuple_eq {
             }
         }};
     }
+
+#[cfg(test)]
+macro_rules! assert_color_eq {
+        ($left:expr, $right:expr $(, $set:ident = $val:expr)*) => {{
+            match (&$left, &$right) {
+                (left_val, right_val) => {
+                    if !approx_eq!(Color, *left_val, *right_val $(, $set = $val)*) {
+                        panic!(
+                            r#"assertion failed: `(left approxEquals right)`
+   left: `{:?}`
+  right: `{:?}`"#,
+                            &*left_val, &*right_val
+                        );
+                    }
+                }
+            }
+        }};
+    }

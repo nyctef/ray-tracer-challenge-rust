@@ -19,6 +19,8 @@ mod transformations;
 pub use transformations::*;
 mod tuple;
 pub use tuple::*;
+mod lighting;
+pub use lighting::*;
 
 #[macro_use]
 extern crate impl_ops;
