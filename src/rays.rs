@@ -1,7 +1,7 @@
 use crate::*;
 use std::ops::Mul;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {
     pub origin: Tuple,
     pub direction: Tuple,

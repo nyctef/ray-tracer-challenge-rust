@@ -11,8 +11,8 @@ pub enum IntersectionObject {
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Intersection {
-    t: f32,
-    obj: IntersectionObject,
+    pub t: f32,
+    pub obj: IntersectionObject,
 }
 
 impl Intersection {
@@ -23,7 +23,7 @@ impl Intersection {
         }
     }
 
-    fn hit(intersections: &[Intersection]) -> Option<&Intersection> {
+    pub fn hit(intersections: &[Intersection]) -> Option<&Intersection> {
         let mut sorted = intersections
             .iter()
             .filter(|a| a.t >= 0.)

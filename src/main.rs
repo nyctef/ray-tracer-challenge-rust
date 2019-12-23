@@ -4,11 +4,20 @@ use rtc::*;
 use std::fs;
 
 fn main() {
-    let canvas_size = 50;
+    let canvas_size = 500;
     let cs2 = (canvas_size as f32) / 2.;
     let mut c = TestCanvas::new(canvas_size, canvas_size);
 
-    let sphere = Sphere::pos_r(Tuple::point(0., 0., 0.), 2.);
+    let mut material = PhongMaterial::default();
+    material.color = Color::new(1., 0.2, 1.);
+    let sphere = Sphere::pos_r_m(
+        Tuple::point(0., 0., 0.),
+        4.5, /*canvas_size as f32 / 20.*/
+        material,
+    );
+
+    let light = PointLight::new(Color::new(1., 1., 1.), Tuple::point(-10., 10., -10.));
+
     let camera_origin = Tuple::point(0., 0., -5.);
     let canvas_z = 10_f32;
 
@@ -20,16 +29,31 @@ fn main() {
                 camera_origin,
                 (Tuple::point(x2, y2, canvas_z) - camera_origin).normalize(),
             );
-            println!("{:?}", ray);
+            // println!("{:?}", ray);
+            // TODO: how to reduce nesting here?
             let intersects = sphere.ray_intersection(ray);
             match intersects {
-                Misses => c.write_pixel(&Color::black(), x, y),
-                Intersects(_) => c.write_pixel(&Color::red(), x, y),
+                Misses => continue,
+                Intersects(intersections) => {
+                    match Intersection::hit(&intersections) {
+                        None => continue,
+                        Some(h) => {
+                            // todo should really get this from the sphere in the hit
+                            // rather than the one sphere we know is in the scene
+                            let point = ray.position(h.t);
+                            let n = sphere.normal_at(point);
+                            let eye = -ray.direction;
+                            let color = lighting(sphere.material, light, point, eye, n);
+                            c.write_pixel(&color, x, canvas_size - y - 1);
+                        }
+                    };
+                }
             }
         }
     }
 
     println!("Done");
 
+    // TODO: write to screen or png instead of ppm
     fs::write("output.ppm", c.to_ppm()).unwrap();
 }

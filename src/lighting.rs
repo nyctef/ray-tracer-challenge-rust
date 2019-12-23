@@ -17,15 +17,15 @@ impl PointLight {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PhongMaterial {
-    color: Color,
-    ambient: f32,
-    diffuse: f32,
-    specular: f32,
-    shininess: f32,
+    pub color: Color,
+    pub ambient: f32,
+    pub diffuse: f32,
+    pub specular: f32,
+    pub shininess: f32,
 }
 
 impl PhongMaterial {
-    fn new(
+    pub fn new(
         color: Color,
         ambient: f32,
         diffuse: f32,
