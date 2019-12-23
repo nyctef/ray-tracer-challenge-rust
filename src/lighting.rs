@@ -49,7 +49,7 @@ impl Default for PhongMaterial {
 }
 
 #[derive(Debug, Clone)]
-pub struct LightHit {
+struct LightHit {
     pub point: Tuple,
     pub surface_normal: Tuple,
     pub to_eye: Tuple,
@@ -59,13 +59,13 @@ pub struct LightHit {
     pub inside: bool,
 }
 
-pub fn light_ray(ray: Ray, object: Sphere) -> Option<LightHit> {
-    let intersects = object.ray_intersection(ray)?;
-    let hit = Intersection::hit(&intersects)?;
+fn prepare_computations(hit: &intersections::Intersection, ray: Ray) -> Option<LightHit> {
     let point = ray.position(hit.t);
     let to_eye = -ray.direction;
 
-    let mut surface_normal = object.normal_at(point);
+    let mut surface_normal = match hit.obj {
+        IntersectionObject::Sphere(s) => s.normal_at(point),
+    };
     let mut inside = false;
     if surface_normal.dot(to_eye) < 0. {
         // surface_normal is pointing away from eye, so
@@ -74,7 +74,9 @@ pub fn light_ray(ray: Ray, object: Sphere) -> Option<LightHit> {
         inside = true;
     }
 
-    let material = object.material;
+    let material = match hit.obj {
+        IntersectionObject::Sphere(s) => s.material,
+    };
     Some(LightHit {
         point,
         surface_normal,
@@ -84,8 +86,14 @@ pub fn light_ray(ray: Ray, object: Sphere) -> Option<LightHit> {
     })
 }
 
+fn light_ray(world: &World, ray: Ray) -> Option<LightHit> {
+    let intersects = world.ray_intersection(ray);
+    let hit = Intersection::hit(&intersects)?;
+    prepare_computations(hit, ray)
+}
+
 // TODO: traits for material, light, etc?
-pub fn lighting(
+fn lighting(
     material: PhongMaterial,
     light: PointLight,
     surface_position: Tuple,
@@ -122,7 +130,7 @@ pub fn lighting(
     ambient + diffuse + specular
 }
 
-pub fn shade_hit(world: &World, hit: LightHit) -> Color {
+fn shade_hit(world: &World, hit: LightHit) -> Color {
     let mut result = Color::black();
 
     for light in &world.lights {
@@ -136,6 +144,12 @@ pub fn shade_hit(world: &World, hit: LightHit) -> Color {
     }
 
     result
+}
+
+pub fn color_at(world: &World, ray: Ray) -> Color {
+    light_ray(world, ray)
+        .map(|h| shade_hit(world, h))
+        .unwrap_or(Color::black())
 }
 
 #[cfg(test)]
@@ -216,7 +230,8 @@ mod tests {
     fn light_ray_from_outside_sphere() {
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
         let shape = Sphere::unit();
-        let intersection = light_ray(r, shape).unwrap();
+        let hit = intersections::Intersection::ray_sphere(shape, 4.);
+        let intersection = prepare_computations(&hit, r).unwrap();
 
         assert_eq!(Tuple::vec(0., 0., -1.), intersection.surface_normal);
         assert_eq!(false, intersection.inside);
@@ -226,7 +241,8 @@ mod tests {
     fn light_ray_from_inside_sphere() {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
         let shape = Sphere::unit();
-        let intersection = light_ray(r, shape).unwrap();
+        let hit = intersections::Intersection::ray_sphere(shape, 1.);
+        let intersection = prepare_computations(&hit, r).unwrap();
 
         // since we're hitting the +ve z side of the sphere, the outside normal is (0,0,+1)
         // but it's inverted since we're hitting the inside
@@ -236,11 +252,10 @@ mod tests {
 
     #[test]
     fn shade_hit_from_outside_sphere() {
-        let w = World::default();
+        let w = &World::default();
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
-        let shape = w.objects[0];
-        let intersection = light_ray(r, shape).unwrap();
-        let color = shade_hit(&w, intersection);
+        let hit = light_ray(w, r).unwrap();
+        let color = shade_hit(w, hit);
 
         assert_color_eq!(
             Color::new(0.38066, 0.47583, 0.2855),
@@ -254,9 +269,8 @@ mod tests {
         let mut w = World::default();
         w.lights[0] = PointLight::new(Color::white(), Tuple::point(0., 0.25, 0.));
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
-        let shape = w.objects[1];
-        let intersection = light_ray(r, shape).unwrap();
-        let color = shade_hit(&w, intersection);
+        let hit = light_ray(&w, r).unwrap();
+        let color = shade_hit(&w, hit);
 
         assert_color_eq!(
             Color::new(0.90498, 0.90498, 0.90498),

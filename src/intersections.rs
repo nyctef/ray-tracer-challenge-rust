@@ -18,7 +18,7 @@ pub struct Intersection {
 }
 
 impl Intersection {
-    fn ray_sphere(sphere: Sphere, t: f32) -> Intersection {
+    pub fn ray_sphere(sphere: Sphere, t: f32) -> Intersection {
         Intersection {
             t,
             obj: IntersectionObject::Sphere(sphere),

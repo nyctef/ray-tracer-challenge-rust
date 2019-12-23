@@ -6,10 +6,12 @@ fn main() {
     let mut c = PngCanvas::new(resolution, resolution);
 
     let mut material = PhongMaterial::default();
-    material.color = Color::new(1., 0.2, 1.);
+    material.color = Color::new(0.5, 0.5, 1.);
     let sphere = Sphere::pos_r_m(Tuple::point(0., 0., 0.), 3., material);
 
     let light = PointLight::new(Color::new(1., 1., 1.), Tuple::point(-10., 10., -10.));
+
+    let world = World::new(vec![sphere], vec![light]);
 
     let camera_origin = Tuple::point(0., 0., -5.);
     let canvas_size = 50.;
@@ -27,17 +29,8 @@ fn main() {
                 (Tuple::point(x2, y2, canvas_z) - camera_origin).normalize(),
             );
 
-            light_ray(ray, sphere).map(|hit| {
-                let color = lighting(
-                    hit.material,
-                    light,
-                    hit.point,
-                    hit.to_eye,
-                    hit.surface_normal,
-                );
-
-                c.write_pixel(&color, x, resolution - y - 1);
-            });
+            let color = color_at(&world, ray);
+            c.write_pixel(&color, x, resolution - y - 1);
         }
     }
 
