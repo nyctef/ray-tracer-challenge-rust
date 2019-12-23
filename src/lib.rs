@@ -21,6 +21,8 @@ mod tuple;
 pub use tuple::*;
 mod lighting;
 pub use lighting::*;
+mod world;
+pub use world::*;
 
 #[macro_use]
 extern crate impl_ops;

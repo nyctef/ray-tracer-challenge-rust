@@ -1,5 +1,7 @@
 mod ray_sphere;
 pub use self::ray_sphere::*;
+mod ray_world;
+pub use self::ray_world::*;
 
 use crate::*;
 use std::cmp::Ordering::Equal;
