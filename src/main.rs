@@ -30,26 +30,14 @@ fn main() {
                 camera_origin,
                 (Tuple::point(x2, y2, canvas_z) - camera_origin).normalize(),
             );
-            // println!("{:?}", ray);
-            // TODO: how to reduce nesting here?
-            let intersects = sphere.ray_intersection(ray);
-            match intersects {
-                Misses => continue,
-                Intersects(intersections) => {
-                    match Intersection::hit(&intersections) {
-                        None => continue,
-                        Some(h) => {
-                            // todo should really get this from the sphere in the hit
-                            // rather than the one sphere we know is in the scene
-                            let point = ray.position(h.t);
-                            let n = sphere.normal_at(point);
-                            let eye = -ray.direction;
-                            let color = lighting(sphere.material, light, point, eye, n);
-                            c.write_pixel(&color, x, canvas_size - y - 1);
-                        }
-                    };
-                }
-            }
+
+            light_ray(ray, sphere).map(|hit| {
+                // todo should really get material from the sphere in the hit
+                // rather than the one sphere we know is in the scene
+                let eye = -ray.direction;
+                let color = lighting(sphere.material, light, hit.point, eye, hit.surface_normal);
+                c.write_pixel(&color, x, canvas_size - y - 1);
+            });
         }
     }
 

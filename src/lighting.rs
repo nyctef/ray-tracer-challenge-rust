@@ -48,6 +48,22 @@ impl Default for PhongMaterial {
     }
 }
 
+pub struct LightHit {
+    pub point: Tuple,
+    pub surface_normal: Tuple,
+}
+
+pub fn light_ray(ray: Ray, object: Sphere) -> Option<LightHit> {
+    let intersects = object.ray_intersection(ray)?;
+    let hit = Intersection::hit(&intersects)?;
+    let point = ray.position(hit.t);
+    let surface_normal = object.normal_at(point);
+    Some(LightHit {
+        point,
+        surface_normal,
+    })
+}
+
 // TODO: traits for material, light, etc?
 pub fn lighting(
     material: PhongMaterial,
