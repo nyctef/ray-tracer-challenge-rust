@@ -49,7 +49,6 @@ fn clamp(value: f32, min: f32, max: f32) -> f32 {
     }
 }
 
-/// some magic to make ApproxEq work for Tuple
 /// based on https://docs.rs/float-cmp/0.6.0/float_cmp/index.html
 impl ApproxEq for Color {
     type Margin = F32Margin;

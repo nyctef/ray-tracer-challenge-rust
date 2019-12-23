@@ -1,5 +1,7 @@
 use crate::*;
 use std::ops::Mul;
+extern crate float_cmp;
+use self::float_cmp::{ApproxEq, F32Margin};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {
@@ -16,6 +18,17 @@ impl Ray {
 
     pub fn position(&self, t: f32) -> Tuple {
         &self.origin + &self.direction * t
+    }
+}
+
+/// based on https://docs.rs/float-cmp/0.6.0/float_cmp/index.html
+impl ApproxEq for Ray {
+    type Margin = F32Margin;
+
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
+        self.origin.approx_eq(other.origin, margin)
+            && self.direction.approx_eq(other.direction, margin)
     }
 }
 

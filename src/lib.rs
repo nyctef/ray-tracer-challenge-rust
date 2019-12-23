@@ -25,6 +25,8 @@ mod lighting;
 pub use lighting::*;
 mod world;
 pub use world::*;
+mod camera;
+pub use camera::*;
 
 #[macro_use]
 extern crate impl_ops;
