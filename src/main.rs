@@ -6,33 +6,22 @@ fn main() {
     let mut c = PngCanvas::new(resolution, resolution);
 
     let mut material = PhongMaterial::default();
-    material.color = Color::new(0.5, 0.5, 1.);
+    material.color = Color::new(1., 0.5, 1.);
     let sphere = Sphere::pos_r_m(Tuple::point(0., 0., 0.), 3., material);
 
     let light = PointLight::new(Color::new(1., 1., 1.), Tuple::point(-10., 10., -10.));
 
     let world = World::new(vec![sphere], vec![light]);
 
-    let camera_origin = Tuple::point(0., 0., -5.);
-    let canvas_size = 50.;
-    let canvas_z = 10_f32;
+    let mut camera = Camera::from_size(500, 500, std::f32::consts::PI / 3.);
+    camera.view_transform = view_transform(
+        Tuple::point(0., 0., -10.),
+        Tuple::point(0., 0., 0.),
+        Tuple::vec(0., 1., 0.),
+    );
 
-    let px_per_canvas_width = resolution as f32 / canvas_size;
-
-    for x in 0..resolution {
-        for y in 0..resolution {
-            let x2 = (x as f32) / px_per_canvas_width - (canvas_size / 2.);
-            let y2 = (y as f32) / px_per_canvas_width - (canvas_size / 2.);
-            // println!("{} {}", x2, y2);
-            let ray = Ray::new(
-                camera_origin,
-                (Tuple::point(x2, y2, canvas_z) - camera_origin).normalize(),
-            );
-
-            let color = color_at(&world, ray);
-            c.write_pixel(&color, x, resolution - y - 1);
-        }
-    }
+    // TODO: should the world contain the camera and render_to()?
+    camera.render_to(&world, &mut c);
 
     println!("Done");
 

@@ -71,6 +71,16 @@ impl Camera {
 
         Ray::new(origin, direction)
     }
+
+    pub fn render_to<T: Canvas>(&self, world: &World, canvas: &mut T) {
+        for y in 0..self.vsize - 1 {
+            for x in 0..self.hsize - 1 {
+                let ray = self.ray_for_pixel(x, y);
+                let color = color_at(world, ray);
+                canvas.write_pixel(&color, x, y);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
