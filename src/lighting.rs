@@ -53,20 +53,33 @@ pub struct LightHit {
     pub surface_normal: Tuple,
     pub to_eye: Tuple,
     pub material: PhongMaterial,
+    // whether the light ray hit the inside surface of the object.
+    // in this case surface_normal is reversed to provide a useful value
+    pub inside: bool,
 }
 
 pub fn light_ray(ray: Ray, object: Sphere) -> Option<LightHit> {
     let intersects = object.ray_intersection(ray)?;
     let hit = Intersection::hit(&intersects)?;
     let point = ray.position(hit.t);
-    let surface_normal = object.normal_at(point);
-    let material = object.material;
     let to_eye = -ray.direction;
+
+    let mut surface_normal = object.normal_at(point);
+    let mut inside = false;
+    if surface_normal.dot(to_eye) < 0. {
+        // surface_normal is pointing away from eye, so
+        // we're hitting the inside of the surface
+        surface_normal = -surface_normal;
+        inside = true;
+    }
+
+    let material = object.material;
     Some(LightHit {
         point,
         surface_normal,
         material,
         to_eye,
+        inside,
     })
 }
 
@@ -180,5 +193,27 @@ mod tests {
         let result = lighting(material, light, surface_position, eye, normal);
         // only the ambient light is present
         assert_color_eq!(Color::new(0.1, 0.1, 0.1), result, epsilon = 0.0001);
+    }
+
+    #[test]
+    fn light_ray_from_outside_sphere() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let shape = Sphere::unit();
+        let intersection = light_ray(r, shape).unwrap();
+
+        assert_eq!(Tuple::vec(0., 0., -1.), intersection.surface_normal);
+        assert_eq!(false, intersection.inside);
+    }
+
+    #[test]
+    fn light_ray_from_inside_sphere() {
+        let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
+        let shape = Sphere::unit();
+        let intersection = light_ray(r, shape).unwrap();
+
+        // since we're hitting the +ve z side of the sphere, the outside normal is (0,0,+1)
+        // but it's inverted since we're hitting the inside
+        assert_eq!(Tuple::vec(0., 0., -1.), intersection.surface_normal);
+        assert_eq!(true, intersection.inside);
     }
 }
