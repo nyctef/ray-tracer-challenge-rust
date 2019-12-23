@@ -7,7 +7,16 @@ pub trait Canvas {
     fn height(&self) -> usize;
     fn pixel_at(&self, x: usize, y: usize) -> &Color;
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize);
-    fn to_ppm(&self) -> String {
+}
+
+pub struct PpmCanvas {
+    width: usize,
+    height: usize,
+    grid: Vec<Vec<Color>>,
+}
+
+impl PpmCanvas {
+    pub fn to_ppm(&self) -> String {
         let mut pixel_data = vec![vec!["0".to_string(); self.width()]; self.height()];
 
         for y in 0..self.height() {
@@ -39,16 +48,10 @@ pub trait Canvas {
     }
 }
 
-pub struct TestCanvas {
-    width: usize,
-    height: usize,
-    grid: Vec<Vec<Color>>,
-}
-
-impl Canvas for TestCanvas {
+impl Canvas for PpmCanvas {
     fn new(width: usize, height: usize) -> Self {
         let grid = vec![vec![Color::black(); width]; height];
-        TestCanvas {
+        PpmCanvas {
             width,
             height,
             grid,
@@ -90,10 +93,18 @@ macro_rules! canvas_tests {
             c.write_pixel(&Color::red(), 2, 3);
             assert_eq!(&Color::red(), c.pixel_at(2, 3));
         }
+    };
+}
+
+#[cfg(test)]
+mod tests {
+    mod test_canvas {
+        use super::super::*;
+        canvas_tests!(PpmCanvas);
 
         #[test]
         fn can_create_basic_ppm_header() {
-            let c: $canvasType = Canvas::new(5, 3);
+            let c: PpmCanvas = Canvas::new(5, 3);
             let ppm = c.to_ppm();
             let header_lines = ppm.split("\n").take(3).collect::<Vec<_>>();
 
@@ -107,7 +118,7 @@ macro_rules! canvas_tests {
 
         #[test]
         fn can_write_ppm_pixel_data() {
-            let mut c: $canvasType = Canvas::new(5, 3);
+            let mut c: PpmCanvas = Canvas::new(5, 3);
             let c1 = Color::new(1.5, 0.0, 0.0);
             let c2 = Color::new(0.0, 0.5, 0.0);
             let c3 = Color::new(-0.5, 0.0, 1.0);
@@ -132,18 +143,10 @@ macro_rules! canvas_tests {
 
         #[test]
         fn ppm_ends_with_newline_char() {
-            let c: $canvasType = Canvas::new(5, 3);
+            let c: PpmCanvas = Canvas::new(5, 3);
             let ppm = c.to_ppm();
 
             assert_eq!('\n', ppm.chars().last().unwrap());
         }
-    };
-}
-
-#[cfg(test)]
-mod tests {
-    mod test_canvas {
-        use super::super::*;
-        canvas_tests!(TestCanvas);
     }
 }

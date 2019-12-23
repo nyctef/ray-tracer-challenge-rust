@@ -4,7 +4,7 @@ use std::fs;
 
 fn main() {
     let resolution = 500;
-    let mut c = TestCanvas::new(resolution, resolution);
+    let mut c = PpmCanvas::new(resolution, resolution);
 
     let mut material = PhongMaterial::default();
     material.color = Color::new(1., 0.2, 1.);
