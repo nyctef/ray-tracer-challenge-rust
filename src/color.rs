@@ -73,6 +73,14 @@ impl_op_ex!(*|c1: &Color, c2: &Color| -> Color {
 });
 impl_op_ex!(*|c1: &Color, x: f32| -> Color { Color::new(c1.r * x, c1.g * x, c1.b * x) });
 
+impl ops::AddAssign<Color> for Color {
+    fn add_assign(&mut self, c2: Color) {
+        self.r += c2.r;
+        self.g += c2.g;
+        self.b += c2.b;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use self::float_cmp::approx_eq;

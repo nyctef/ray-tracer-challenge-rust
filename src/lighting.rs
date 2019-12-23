@@ -48,6 +48,7 @@ impl Default for PhongMaterial {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct LightHit {
     pub point: Tuple,
     pub surface_normal: Tuple,
@@ -119,6 +120,22 @@ pub fn lighting(
     };
 
     ambient + diffuse + specular
+}
+
+pub fn shade_hit(world: &World, hit: LightHit) -> Color {
+    let mut result = Color::black();
+
+    for light in &world.lights {
+        result += lighting(
+            hit.material,
+            *light,
+            hit.point,
+            hit.to_eye,
+            hit.surface_normal,
+        );
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -215,5 +232,42 @@ mod tests {
         // but it's inverted since we're hitting the inside
         assert_eq!(Tuple::vec(0., 0., -1.), intersection.surface_normal);
         assert_eq!(true, intersection.inside);
+    }
+
+    #[test]
+    fn shade_hit_from_outside_sphere() {
+        let w = World::default();
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let shape = w.objects[0];
+        let intersection = light_ray(r, shape).unwrap();
+        let color = shade_hit(&w, intersection);
+
+        assert_color_eq!(
+            Color::new(0.38066, 0.47583, 0.2855),
+            color,
+            epsilon = 0.00001
+        );
+    }
+
+    #[test]
+    fn shade_hit_from_inside_sphere() {
+        let mut w = World::default();
+        w.lights[0] = PointLight::new(Color::white(), Tuple::point(0., 0.25, 0.));
+        let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
+        let shape = w.objects[1];
+        let intersection = light_ray(r, shape).unwrap();
+        let color = shade_hit(&w, intersection);
+
+        assert_color_eq!(
+            Color::new(0.90498, 0.90498, 0.90498),
+            color,
+            epsilon = 0.00001
+        );
+    }
+
+    #[test]
+    #[ignore]
+    fn shade_hit_with_multiple_lights() {
+        unimplemented!();
     }
 }
