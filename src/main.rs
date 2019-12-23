@@ -32,10 +32,9 @@ fn main() {
             );
 
             light_ray(ray, sphere).map(|hit| {
-                // todo should really get material from the sphere in the hit
-                // rather than the one sphere we know is in the scene
                 let eye = -ray.direction;
-                let color = lighting(sphere.material, light, hit.point, eye, hit.surface_normal);
+                let color = lighting(hit.material, light, hit.point, eye, hit.surface_normal);
+
                 c.write_pixel(&color, x, canvas_size - y - 1);
             });
         }
