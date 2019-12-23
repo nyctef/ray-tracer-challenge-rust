@@ -7,7 +7,6 @@ pub type Matrix4 = Matrix<f32, U4, U4, ArrayStorage<f32, U4, U4>>;
 pub type Matrix3 = Matrix<f32, U3, U3, ArrayStorage<f32, U3, U3>>;
 pub type Matrix2 = Matrix<f32, U2, U2, ArrayStorage<f32, U2, U2>>;
 
-// TODO: should probably just replace custom Tuple type with nalgebra as well
 impl Mul<Tuple> for Matrix4 {
     type Output = Tuple;
 

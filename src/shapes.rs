@@ -41,7 +41,6 @@ impl Sphere {
 
     // TODO: possible trait?
     pub fn normal_at(&self, position: Tuple) -> Tuple {
-        // TODO: should these transformations always be invertible? (see TODO in trasnformations.rs tests)
         let world_to_sphere = self
             .transformation
             .try_inverse()
@@ -49,7 +48,7 @@ impl Sphere {
 
         let object_point = world_to_sphere * position;
         let object_normal = object_point - Tuple::point(0., 0., 0.);
-        // TODO: figure out why this works and/or is necessary
+        // https://computergraphics.stackexchange.com/a/1506 for `transpose()` justification
         let mut world_normal = world_to_sphere.transpose() * object_normal;
         world_normal.w = 0.;
         return world_normal.normalize();
@@ -78,8 +77,6 @@ mod tests {
     fn normal_at_points_on_translated_sphere() {
         let s1 = Sphere::pos_r(Tuple::point(0., 1., 0.), 1.);
         let n1 = s1.normal_at(Tuple::point(0., 1.707111, -0.70711));
-        // TODO: is it possible to figure out if this is a sensible epsilon?
-        // is there more precision we should be preserving?
         assert_tuple_eq!(n1, Tuple::vec(0., 0.70711, -0.70711), epsilon = 0.0001);
 
         let s2 = Sphere::new(

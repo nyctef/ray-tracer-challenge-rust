@@ -29,7 +29,6 @@ impl Tuple {
         Tuple::new(x, y, z, 0.0)
     }
 
-    // TODO: does w need an approximate comparison?
     pub fn is_point(&self) -> bool {
         self.w == 1.0
     }
@@ -68,7 +67,6 @@ impl PartialEq for Tuple {
 
 /// some magic to make ApproxEq work for Tuple
 /// based on https://docs.rs/float-cmp/0.6.0/float_cmp/index.html
-/// TODO: come back and figure out how this works better
 impl ApproxEq for Tuple {
     type Margin = F32Margin;
 
@@ -178,8 +176,6 @@ mod tests {
 
         assert!(approx_eq!(f32, 1.0, a.normalize().magnitude()));
         assert!(approx_eq!(f32, 1.0, b.normalize().magnitude()));
-        // TODO: can we normalize points? Do we need to worry about preserving the w value?
-        // assert_eq!(1.0, point.normalize().w);
     }
 
     #[test]

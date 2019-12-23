@@ -38,6 +38,5 @@ fn main() {
 
     println!("Done");
 
-    // TODO: write to screen or png instead of ppm
     c.write_to_file("output.png").unwrap();
 }

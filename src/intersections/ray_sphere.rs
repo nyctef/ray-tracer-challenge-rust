@@ -7,11 +7,8 @@ impl RayIntersection for Sphere {
     fn ray_intersection(self, ray: Ray) -> Self::OutputType {
         // we use the inverse of the sphere's transformation to move the ray
         // into the sphere's object space
-        let inverse = match self.transformation.try_inverse() {
-            // TODO: some sort of warning for the failed inverse?
-            None => return None,
-            Some(x) => x,
-        };
+
+        let inverse = self.transformation.try_inverse()?;
         let ray2 = inverse * ray;
 
         // now we can intersect ray2 with the unit sphere
