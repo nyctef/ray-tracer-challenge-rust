@@ -11,5 +11,6 @@ path ="./src/lib.rs"
 float-cmp = "0.6.0"
 impl_ops = "0.1.1"
 nalgebra = "0.18"
+approx = "0.3.2"
 png = "0.15.2"
 

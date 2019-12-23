@@ -1,4 +1,5 @@
-use crate::matrixes::Matrix4;
+use crate::*;
+extern crate approx;
 
 pub fn translation(x: f32, y: f32, z: f32) -> Matrix4 {
     Matrix4::new(
@@ -58,9 +59,31 @@ pub fn shearing(x_from_y: f32, x_from_z: f32, y_from_x: f32, y_from_z: f32, z_fr
     )
 }
 
+// a transform from world space into camera space, where the camera is
+// at `from`, facing `to`, with `up` defining the camera rotation
+pub fn view_transform(from: Tuple, to: Tuple, up: Tuple) -> Matrix4 {
+    assert!(from.is_point());
+    assert!(to.is_point());
+    assert!(up.is_vec());
+
+    let forward = (to - from).normalize();
+    let left = forward.cross(&up.normalize());
+    // TODO: figure out the difference between `up` and `true_up`
+    let true_up = left.cross(&forward);
+    let orientation = Matrix4::new(
+        left.x, left.y, left.z, 0., //
+        true_up.x, true_up.y, true_up.z, 0., //
+        -forward.x, -forward.y, -forward.z, 0., //
+        0., 0., 0., 1.,
+    );
+
+    orientation * translation(-from.x, -from.y, -from.z)
+}
+
 #[cfg(test)]
 mod tests {
     extern crate float_cmp;
+    use self::approx::assert_relative_eq;
     use self::float_cmp::approx_eq;
     use super::*;
     use crate::tuple::Tuple;
@@ -209,15 +232,54 @@ mod tests {
         assert_eq!(Tuple::point(2., 3., 7.), t6 * p6);
     }
 
-    // #[test]
-    // fn sequencing_transformations() {
-    //     let t1 = scaling(3., 3., 3.);
-    //     let t2 = translation(1., 1., 1.);
+    #[test]
+    fn default_view_transform_is_identity_matrix() {
+        // the default view transform actually looks along the z axis in the negative direction-
+        // adding a camera requires things to be flipped
+        let vt = view_transform(
+            Tuple::point(0., 0., 0.),
+            Tuple::point(0., 0., -1.),
+            Tuple::vec(0., 1., 0.),
+        );
+        assert_eq!(Matrix4::identity(), vt);
+    }
 
-    //     let p1 = Tuple::point(1., 1., 0.);
+    #[test]
+    fn view_transform_for_positive_z_axis_direction() {
+        let vt = view_transform(
+            Tuple::point(0., 0., 0.),
+            Tuple::point(0., 0., 1.),
+            Tuple::vec(0., 1., 0.),
+        );
+        // now we flip the z and x axes
+        assert_eq!(scaling(-1., 1., -1.), vt);
+    }
 
-    //     println!("{:?}", t1 * t2 * p1);
-    //     println!("{:?}", t2 * t1 * p1);
-    //     panic!();
-    // }
+    #[test]
+    fn the_view_transform_moves_the_world() {
+        let vt = view_transform(
+            Tuple::point(0., 0., 8.),
+            Tuple::point(0., 0., 0.),
+            Tuple::vec(0., 1., 0.),
+        );
+        // if the camera is at z=8, then we shift the whole world -8 on z axis to put the camera at the origin
+        assert_eq!(translation(0., 0., -8.), vt);
+    }
+
+    #[test]
+    fn an_arbitrary_view_transform() {
+        // example from book
+        let vt = view_transform(
+            Tuple::point(1., 3., 2.),
+            Tuple::point(4., -2., 8.),
+            Tuple::vec(1., 1., 0.),
+        );
+        let expected = Matrix4::new(
+            -0.50709, 0.50709, 0.67612, -2.36643, //
+            0.76772, 0.60609, 0.12122, -2.82843, //
+            -0.35857, 0.59761, -0.71714, 0.00000, //
+            0.00000, 0.00000, 0.00000, 1.00000, //
+        );
+        assert_relative_eq!(expected, vt, epsilon = 0.00001);
+    }
 }

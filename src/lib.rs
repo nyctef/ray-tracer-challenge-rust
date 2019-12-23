@@ -2,6 +2,8 @@
 mod asserts;
 pub use asserts::*;
 
+extern crate nalgebra as na;
+
 pub use asserts::*;
 mod canvas;
 pub use canvas::*;

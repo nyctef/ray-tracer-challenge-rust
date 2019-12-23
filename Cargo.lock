@@ -289,6 +289,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "ray-tracer-challenge"
 version = "0.1.0"
 dependencies = [
+ "approx 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "float-cmp 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "impl_ops 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "nalgebra 0.18.1 (registry+https://github.com/rust-lang/crates.io-index)",
