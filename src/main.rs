@@ -4,6 +4,7 @@ use rtc::*;
 use std::fs;
 
 fn main() {
+    // TODO: decouple resolution and "camera canvas size"
     let canvas_size = 500;
     let cs2 = (canvas_size as f32) / 2.;
     let mut c = TestCanvas::new(canvas_size, canvas_size);
