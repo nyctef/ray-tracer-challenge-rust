@@ -51,6 +51,7 @@ impl Default for PhongMaterial {
 pub struct LightHit {
     pub point: Tuple,
     pub surface_normal: Tuple,
+    pub to_eye: Tuple,
     pub material: PhongMaterial,
 }
 
@@ -60,10 +61,12 @@ pub fn light_ray(ray: Ray, object: Sphere) -> Option<LightHit> {
     let point = ray.position(hit.t);
     let surface_normal = object.normal_at(point);
     let material = object.material;
+    let to_eye = -ray.direction;
     Some(LightHit {
         point,
         surface_normal,
         material,
+        to_eye,
     })
 }
 

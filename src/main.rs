@@ -28,8 +28,13 @@ fn main() {
             );
 
             light_ray(ray, sphere).map(|hit| {
-                let eye = -ray.direction;
-                let color = lighting(hit.material, light, hit.point, eye, hit.surface_normal);
+                let color = lighting(
+                    hit.material,
+                    light,
+                    hit.point,
+                    hit.to_eye,
+                    hit.surface_normal,
+                );
 
                 c.write_pixel(&color, x, resolution - y - 1);
             });
