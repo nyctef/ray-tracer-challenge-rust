@@ -1,5 +1,13 @@
 use crate::*;
+
+use std::fs;
+use std::io;
+use std::path::Path;
 use std::vec::Vec;
+
+extern crate png;
+
+type WriteResult = Result<(), Box<dyn std::error::Error>>;
 
 pub trait Canvas {
     fn new(width: usize, height: usize) -> Self;
@@ -7,6 +15,8 @@ pub trait Canvas {
     fn height(&self) -> usize;
     fn pixel_at(&self, x: usize, y: usize) -> &Color;
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize);
+    // TODO: try out failure lib: https://stackoverflow.com/questions/48430836/rust-proper-error-handling-auto-convert-from-one-error-type-to-another-with-que
+    fn write_to_file(&self, filename: &str) -> WriteResult;
 }
 
 pub struct PpmCanvas {
@@ -69,6 +79,9 @@ impl Canvas for PpmCanvas {
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize) {
         &self.grid[y][x].set(c);
     }
+    fn write_to_file(&self, filename: &str) -> WriteResult {
+        Ok(fs::write(filename, self.to_ppm())?)
+    }
 }
 
 #[allow(unused_macros)]
@@ -96,9 +109,59 @@ macro_rules! canvas_tests {
     };
 }
 
+pub struct PngCanvas {
+    // TODO: should probably pull out a common basic canvas rather than reusing this
+    inner: PpmCanvas,
+}
+
+impl Canvas for PngCanvas {
+    fn new(width: usize, height: usize) -> Self {
+        PngCanvas {
+            inner: PpmCanvas::new(width, height),
+        }
+    }
+    fn width(&self) -> usize {
+        self.inner.width()
+    }
+    fn height(&self) -> usize {
+        self.inner.height()
+    }
+    fn pixel_at(&self, x: usize, y: usize) -> &Color {
+        self.inner.pixel_at(x, y)
+    }
+    fn write_pixel(&mut self, c: &Color, x: usize, y: usize) {
+        self.inner.write_pixel(c, x, y);
+    }
+    fn write_to_file(&self, filename: &str) -> WriteResult {
+        // based on code at https://docs.rs/png/0.15.2/png/index.html#using-the-encoder
+        let path = Path::new(filename);
+        let file = fs::File::create(path)?;
+        let ref mut w = io::BufWriter::new(file);
+
+        let mut encoder = png::Encoder::new(w, self.width() as u32, self.height() as u32);
+        encoder.set_color(png::ColorType::RGB);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder.write_header()?;
+
+        let mut data = Vec::<u8>::new();
+
+        // todo: could simplify this if PngCanvas owns its own data
+        for y in 0..self.height() {
+            for x in 0..self.width() {
+                let p = self.pixel_at(x, y).clamp();
+                data.push((p.r * 255.0).round() as u8);
+                data.push((p.g * 255.0).round() as u8);
+                data.push((p.b * 255.0).round() as u8);
+            }
+        }
+
+        Ok(writer.write_image_data(&data)?)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    mod test_canvas {
+    mod ppmcanvas {
         use super::super::*;
         canvas_tests!(PpmCanvas);
 
@@ -148,5 +211,10 @@ mod tests {
 
             assert_eq!('\n', ppm.chars().last().unwrap());
         }
+    }
+
+    mod pngcanvas {
+        use super::super::*;
+        canvas_tests!(PngCanvas);
     }
 }

@@ -1,10 +1,9 @@
 extern crate rtc;
 use rtc::*;
-use std::fs;
 
 fn main() {
     let resolution = 500;
-    let mut c = PpmCanvas::new(resolution, resolution);
+    let mut c = PngCanvas::new(resolution, resolution);
 
     let mut material = PhongMaterial::default();
     material.color = Color::new(1., 0.2, 1.);
@@ -40,5 +39,5 @@ fn main() {
     println!("Done");
 
     // TODO: write to screen or png instead of ppm
-    fs::write("output.ppm", c.to_ppm()).unwrap();
+    c.write_to_file("output.png").unwrap();
 }
