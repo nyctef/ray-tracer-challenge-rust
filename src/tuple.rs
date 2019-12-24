@@ -30,11 +30,14 @@ impl Tuple {
     }
 
     pub fn is_point(&self) -> bool {
-        self.w == 1.0
+        // TODO: should we be forcing w back to exactly 0 / 1?
+        // approx_eq!(1.0, self.w) // TODO
+        (self.w - 1.0).abs() < 0.0001
     }
 
     pub fn is_vec(&self) -> bool {
-        self.w == 0.0
+        // approx_eq!(1.0, self.w) // TODO
+        (self.w).abs() < 0.0001
     }
 
     pub fn magnitude(&self) -> f32 {
