@@ -33,6 +33,9 @@ struct SdlCanvas<'a>(&'a mut sdl2::render::WindowCanvas);
 
 impl SdlCanvas<'_> {
     fn present(&mut self) {
+        // since SdlCanvas owns a mutable reference to the underlying canvas
+        // we can't call canvas.present() from an external function; we need
+        // to forward the call through this struct.
         self.0.present();
     }
 }
