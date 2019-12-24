@@ -143,10 +143,10 @@ impl Canvas for PngCanvas {
         // todo: could simplify this if PngCanvas owns its own data
         for y in 0..self.height() {
             for x in 0..self.width() {
-                let p = self.pixel_at(x, y).clamp();
-                data.push((p.r * 255.0).round() as u8);
-                data.push((p.g * 255.0).round() as u8);
-                data.push((p.b * 255.0).round() as u8);
+                let p = self.pixel_at(x, y).clamp().to_u8();
+                data.push(p.0);
+                data.push(p.1);
+                data.push(p.2);
             }
         }
 

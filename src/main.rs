@@ -79,6 +79,10 @@ fn main() {
         }
     }
 
+    let mut png_canvas = PngCanvas::new(resolution, resolution);
+    camera.render_to(&world, &mut png_canvas);
+    png_canvas.write_to_file("output.png").unwrap();
+
     // TODO: render to screen
     // TODO: render two spheres and try a basic animation
     //       eg sway the camera based on a sine wave
