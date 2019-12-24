@@ -13,4 +13,5 @@ impl_ops = "0.1.1"
 nalgebra = "0.18"
 approx = "0.3.2"
 png = "0.15.2"
+sdl2 = { version = "0.32.2", features = ["bundled", "static-link"] }
 
