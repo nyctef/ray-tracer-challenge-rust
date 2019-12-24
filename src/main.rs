@@ -25,19 +25,6 @@ fn create_scene(resolution: usize) -> (World, Camera) {
 struct SdlCanvas<'a>(&'a mut sdl2::render::WindowCanvas);
 
 impl Canvas for SdlCanvas<'_> {
-    fn new(width: usize, height: usize) -> Self {
-        // TODO: should this be in the trait if we can't implement it here?
-        panic!("Can't create a SdlCanvas without a window parent, sorry")
-    }
-    fn width(&self) -> usize {
-        0 // TODO
-    }
-    fn height(&self) -> usize {
-        0 // TODO
-    }
-    fn pixel_at(&self, x: usize, y: usize) -> &Color {
-        panic!(); // TODO
-    }
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize) {
         // maybe this is the only really important method on the trait?
         let (r, g, b) = c.clamp().to_u8();
@@ -45,11 +32,6 @@ impl Canvas for SdlCanvas<'_> {
         self.0
             .draw_point(sdl2::rect::Point::new(x as i32, y as i32))
             .unwrap();
-    }
-
-    fn write_to_file(&self, filename: &str) -> Result<(), Box<dyn std::error::Error>> {
-        // TODO
-        Ok(())
     }
 }
 
