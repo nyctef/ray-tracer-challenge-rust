@@ -31,13 +31,8 @@ impl PpmCanvas {
 
         for y in 0..self.height() {
             for x in 0..self.width() {
-                let p = self.pixel_at(x, y).clamp();
-                pixel_data[y][x] = format!(
-                    "{} {} {}",
-                    (p.r * 255.0).round(),
-                    (p.g * 255.0).round(),
-                    (p.b * 255.0).round()
-                )
+                let p = self.pixel_at(x, y).clamp().to_u8();
+                pixel_data[y][x] = format!("{} {} {}", p.0, p.1, p.2)
             }
         }
 

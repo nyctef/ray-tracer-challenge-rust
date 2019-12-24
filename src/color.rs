@@ -37,6 +37,14 @@ impl Color {
             clamp(self.b, 0.0, 1.0),
         )
     }
+
+    pub fn to_u8(&self) -> (u8, u8, u8) {
+        (
+            (self.r * 255.).round() as u8,
+            (self.g * 255.).round() as u8,
+            (self.b * 255.).round() as u8,
+        )
+    }
 }
 
 fn clamp(value: f32, min: f32, max: f32) -> f32 {
