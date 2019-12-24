@@ -39,7 +39,6 @@ impl SdlCanvas<'_> {
 
 impl Canvas for SdlCanvas<'_> {
     fn write_pixel(&mut self, c: &Color, x: usize, y: usize) {
-        // maybe this is the only really important method on the trait?
         let (r, g, b) = c.clamp().to_u8();
         self.0.set_draw_color(sdl2::pixels::Color::RGB(r, g, b));
         self.0
