@@ -1,10 +1,7 @@
 extern crate rtc;
 use rtc::*;
 
-fn main() {
-    let resolution = 500;
-    let mut c = PngCanvas::new(resolution, resolution);
-
+fn create_scene(resolution: usize) -> (World, Camera) {
     let mut material = PhongMaterial::default();
     material.color = Color::new(1., 0.5, 1.);
     let sphere = Sphere::pos_r_m(Tuple::point(0., 0., 0.), 3., material);
@@ -13,7 +10,7 @@ fn main() {
 
     let world = World::new(vec![sphere], vec![light]);
 
-    let mut camera = Camera::from_size(500, 500, std::f32::consts::PI / 3.);
+    let mut camera = Camera::from_size(resolution, resolution, std::f32::consts::PI / 3.);
     camera.view_transform = view_transform(
         Tuple::point(0., 0., -10.),
         Tuple::point(0., 0., 0.),
@@ -21,9 +18,15 @@ fn main() {
     );
 
     // TODO: should the world contain the camera and render_to()?
-    camera.render_to(&world, &mut c);
+    (world, camera)
+}
 
-    println!("Done");
+fn main() {
+    let resolution = 500;
+    let mut c = PngCanvas::new(resolution, resolution);
+
+    let (world, camera) = create_scene(resolution);
+    camera.render_to(&world, &mut c);
 
     // TODO: render to screen
     // TODO: render two spheres and try a basic animation
