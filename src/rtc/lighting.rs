@@ -51,6 +51,8 @@ impl Default for PhongMaterial {
 #[derive(Debug, Clone)]
 struct LightHit {
     pub point: Tuple,
+    // a point slightly above the surface, used to cast shadow rays
+    pub over_point: Tuple,
     pub surface_normal: Tuple,
     pub to_eye: Tuple,
     pub material: PhongMaterial,
@@ -61,11 +63,13 @@ struct LightHit {
 
 fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
     let point = ray.position(hit.t);
+
     let to_eye = -ray.direction;
 
     let mut surface_normal = match hit.obj {
         IntersectionObject::Sphere(s) => s.normal_at(point),
     };
+
     let mut inside = false;
     if surface_normal.dot(to_eye) < 0. {
         // surface_normal is pointing away from eye, so
@@ -74,11 +78,15 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
         inside = true;
     }
 
+    // TODO: this epsilon seems a bit big, but smaller values cause lots of artifacts
+    let over_point = point + (surface_normal.normalize() * 0.0001);
+
     let material = match hit.obj {
         IntersectionObject::Sphere(s) => s.material,
     };
     Some(LightHit {
         point,
+        over_point,
         surface_normal,
         material,
         to_eye,
@@ -140,13 +148,16 @@ fn shade_hit(world: &World, hit: LightHit) -> Color {
     let mut result = Color::black();
 
     for light in &world.lights {
+        // TODO: is_shadowed should probably take a light instead of a world
+        let is_shadowed = is_shadowed(world, hit.over_point);
+
         result += lighting(
             hit.material,
             *light,
             hit.point,
             hit.to_eye,
             hit.surface_normal,
-            false,
+            is_shadowed,
         );
     }
 
@@ -157,6 +168,26 @@ pub fn color_at(world: &World, ray: Ray) -> Color {
     light_ray(world, ray)
         .map(|h| shade_hit(world, h))
         .unwrap_or(Color::black())
+}
+
+fn is_shadowed(world: &World, point: Tuple) -> bool {
+    assert!(point.is_point());
+    // TODO: support more than one light
+    let light = world.lights[0];
+    let point_to_light = light.position - point;
+    let distance_to_light = point_to_light.magnitude();
+    let direction = point_to_light.normalize();
+
+    let intersections = world.ray_intersection(Ray::new(point, direction));
+    let hit = Intersection::hit(&intersections);
+
+    // println!(
+    //     "Casting shadow ray from {:?} to light at {:?} and hit {:?}",
+    //     point, light.position, hit
+    // );
+
+    // if the ray hits, check that anything it hit is further than distance_to_light
+    hit.map(|i| i.t < distance_to_light).unwrap_or(false)
 }
 
 #[cfg(test)]
@@ -293,6 +324,23 @@ mod tests {
     }
 
     #[test]
+    fn shade_hit_with_an_intersection_in_shadow() {
+        let s1 = Sphere::unit();
+        let s2 = Sphere::pos_r(Tuple::point(0., 0., 10.), 1.);
+        let l = PointLight::new(Color::white(), Tuple::point(0., 0., -10.));
+        let w = World::new(vec![s1, s2], vec![l]);
+
+        let hit = light_ray(
+            &w,
+            Ray::new(Tuple::point(0., 0., 5.), Tuple::vec(0., 0., 1.)),
+        )
+        .unwrap();
+
+        let c = shade_hit(&w, hit);
+        assert_eq!(Color::new(0.1, 0.1, 0.1), c);
+    }
+
+    #[test]
     fn lighting_with_surface_in_shadow() {
         let material = PhongMaterial::default();
         let surface_position = Tuple::point(0., 0., 0.);
@@ -303,5 +351,58 @@ mod tests {
         let result = lighting(material, light, surface_position, eye, normal, is_shadow);
         // result is just ambient
         assert_color_eq!(Color::new(0.1, 0.1, 0.1), result, epsilon = 0.0001);
+    }
+
+    #[test]
+    fn should_offset_the_point_for_shadow_rays() {
+        // we can't send shadow rays directly from the ray intersection point,
+        // since there's a chance they'll immediately intersect with the object
+        // being shaded. Instead we bump up the shadow ray source a tiny amount
+        // using the surface normal.
+        // here we send a ray upwards which hits the bottom of a sphere at z=0
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let s = Sphere::pos_r(Tuple::point(0., 0., 1.), 1.);
+        let w = World::new(vec![s], vec![]);
+        let hit = light_ray(&w, r).unwrap();
+
+        assert!(hit.over_point.z > -0.0001);
+        assert!(hit.point.z > hit.over_point.z);
+    }
+
+    mod is_shadowed {
+        use super::super::*;
+
+        #[test]
+        fn no_shadow_when_point_and_obstacle_are_orthogonal() {
+            // light is in top-left-behind quadrant, and object is on top the y axis
+            let w = World::default();
+            let p = Tuple::point(0., 10., 0.);
+            assert_eq!(false, is_shadowed(&w, p));
+        }
+
+        #[test]
+        fn shadow_when_obstacle_between_point_and_light() {
+            // light is in top-left-behind quadrant, and object is in bottom-right-forward quad
+            // the center sphere is between them
+            let w = World::default();
+            let p = Tuple::point(10., -10., 10.);
+            assert_eq!(true, is_shadowed(&w, p));
+        }
+
+        #[test]
+        fn no_shadow_when_obstacle_is_behind_light() {
+            // light is in top-left-behind quadrant, and point is further out in the same direction
+            let w = World::default();
+            let p = Tuple::point(-20., 20., -20.);
+            assert_eq!(false, is_shadowed(&w, p));
+        }
+
+        #[test]
+        fn no_shadow_when_point_is_between_light_and_obstacle() {
+            // light is in top-left-behind quadrant, and point is between it and the origin
+            let w = World::default();
+            let p = Tuple::point(-5., 5., -5.);
+            assert_eq!(false, is_shadowed(&w, p));
+        }
     }
 }
