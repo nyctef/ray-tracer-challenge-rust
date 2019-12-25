@@ -59,7 +59,7 @@ struct LightHit {
     pub inside: bool,
 }
 
-fn prepare_computations(hit: &intersections::Intersection, ray: Ray) -> Option<LightHit> {
+fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
     let point = ray.position(hit.t);
     let to_eye = -ray.direction;
 
@@ -230,7 +230,7 @@ mod tests {
     fn light_ray_from_outside_sphere() {
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
         let shape = Sphere::unit();
-        let hit = intersections::Intersection::ray_sphere(shape, 4.);
+        let hit = Intersection::ray_sphere(shape, 4.);
         let intersection = prepare_computations(&hit, r).unwrap();
 
         assert_eq!(Tuple::vec(0., 0., -1.), intersection.surface_normal);
@@ -241,7 +241,7 @@ mod tests {
     fn light_ray_from_inside_sphere() {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
         let shape = Sphere::unit();
-        let hit = intersections::Intersection::ray_sphere(shape, 1.);
+        let hit = Intersection::ray_sphere(shape, 1.);
         let intersection = prepare_computations(&hit, r).unwrap();
 
         // since we're hitting the +ve z side of the sphere, the outside normal is (0,0,+1)

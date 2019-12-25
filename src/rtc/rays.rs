@@ -55,7 +55,6 @@ pub fn reflect(vector: Tuple, normal: Tuple) -> Tuple {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::transformations::{scaling, translation};
 
     #[test]
     fn creating_a_ray() {

@@ -1,5 +1,5 @@
-use crate::tuple::Tuple;
-use na::{ArrayStorage, Matrix, U2, U3, U4};
+use crate::*;
+use rtc::na::{ArrayStorage, Matrix, U2, U3, U4};
 use std::ops::Mul;
 
 pub type Matrix4 = Matrix<f32, U4, U4, ArrayStorage<f32, U4, U4>>;

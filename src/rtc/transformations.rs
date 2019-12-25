@@ -86,7 +86,6 @@ mod tests {
     use self::approx::assert_relative_eq;
     use self::float_cmp::approx_eq;
     use super::*;
-    use crate::tuple::Tuple;
     use std::f32::consts::PI;
 
     #[test]
