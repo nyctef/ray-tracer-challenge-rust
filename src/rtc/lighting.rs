@@ -365,7 +365,8 @@ mod tests {
         let w = World::new(vec![s], vec![]);
         let hit = light_ray(&w, r).unwrap();
 
-        assert!(hit.over_point.z > -0.0001);
+        // see TODO about large epsilon in prepare_computations
+        assert!(hit.over_point.z > -0.0002);
         assert!(hit.point.z > hit.over_point.z);
     }
 
