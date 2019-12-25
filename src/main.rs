@@ -4,33 +4,6 @@ extern crate sdl2;
 
 use std::f32::consts::PI;
 
-use std::io::stdout;
-use std::io::Write;
-
-fn create_scene(resolution: usize) -> (World, Camera) {
-    let mut material = PhongMaterial::default();
-    material.color = Color::new(1., 0.5, 1.);
-    let sphere = Sphere::pos_r_m(Tuple::point(0., 0., 0.), 3., material);
-
-    let mut material2 = PhongMaterial::default();
-    material2.color = Color::new(0.5, 0.5, 1.);
-    let sphere2 = Sphere::pos_r_m(Tuple::point(4., 0., 0.), 1., material);
-
-    let light = PointLight::new(Color::new(1., 1., 1.), Tuple::point(-10., 10., -10.));
-
-    let world = World::new(vec![sphere, sphere2], vec![light]);
-
-    let mut camera = Camera::from_size(resolution, resolution, std::f32::consts::PI / 3.);
-    camera.view_transform = view_transform(
-        Tuple::point(0., 0., -10.),
-        Tuple::point(0., 0., 0.),
-        Tuple::vec(0., 1., 0.),
-    );
-
-    // TODO: should the world contain the camera and render_to()?
-    (world, camera)
-}
-
 fn create_scene_2(resolution: usize) -> (World, Camera) {
     let mut floor = Sphere::unit();
     floor.transformation = scaling(10., 0.01, 10.);
@@ -121,11 +94,12 @@ fn main() {
         .window("rtc", resolution as u32, resolution as u32)
         .build()
         .unwrap();
-    let mut timer = sdl.timer().unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
 
-    let (world, mut camera) = create_scene_2(resolution);
+    let (world, camera) = create_scene_2(resolution);
     let mut c = SdlCanvas(&mut canvas);
+    camera.render_to(&world, &mut c);
+    c.present();
 
     let mut event_pump = sdl.event_pump().unwrap();
     'main: loop {
@@ -135,20 +109,6 @@ fn main() {
                 _ => {}
             }
         }
-
-        // let ticks = timer.ticks() as f32;
-        // let x = (ticks / 1000.).sin();
-        // let y = (ticks / 1000.).cos();
-        // camera.view_transform = view_transform(
-        //     Tuple::point(x, y, -10.),
-        //     Tuple::point(0., 0., 0.),
-        //     Tuple::vec(0., 1., 0.),
-        // );
-
-        camera.render_to(&world, &mut c);
-        c.present();
-        print!(".");
-        stdout().flush().unwrap();
     }
 
     let mut png_canvas = PngCanvas::new(resolution, resolution);
