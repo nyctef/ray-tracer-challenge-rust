@@ -2,6 +2,8 @@ extern crate rtc;
 use rtc::*;
 extern crate sdl2;
 
+use std::f32::consts::PI;
+
 use std::io::stdout;
 use std::io::Write;
 
@@ -26,6 +28,67 @@ fn create_scene(resolution: usize) -> (World, Camera) {
     );
 
     // TODO: should the world contain the camera and render_to()?
+    (world, camera)
+}
+
+fn create_scene_2(resolution: usize) -> (World, Camera) {
+    let mut floor = Sphere::unit();
+    floor.transformation = scaling(10., 0.01, 10.);
+    floor.material.color = Color::new(1., 0.9, 0.9);
+    floor.material.specular = 0.;
+
+    let mut left_wall = Sphere::unit();
+    left_wall.transformation = translation(0., 0., 5.)
+        * rotation_y(-PI / 4.)
+        * rotation_x(PI / 2.)
+        * scaling(10., 0.01, 10.);
+    left_wall.material = floor.material;
+
+    let mut right_wall = Sphere::unit();
+    right_wall.transformation = translation(0., 0., 5.)
+        * rotation_y(PI / 4.)
+        * rotation_x(PI / 2.)
+        * scaling(10., 0.01, 10.);
+
+    let mut middle_sphere = Sphere::pos_r(Tuple::point(-1.5, 1., 0.5), 1.);
+    middle_sphere.material.color = Color::new(0.1, 1., 0.5);
+    middle_sphere.material.diffuse = 0.7;
+    middle_sphere.material.specular = 0.3;
+
+    let mut right_sphere = Sphere::pos_r(Tuple::point(1.5, 0.5, -0.5), 0.5);
+    right_sphere.material.color = Color::new(0.5, 1., 0.1);
+    right_sphere.material.diffuse = 0.7;
+    right_sphere.material.specular = 0.3;
+
+    let mut left_sphere = Sphere::pos_r(Tuple::point(-1.5, 0.33, -0.75), 0.33);
+    left_sphere.material.color = Color::new(1., 0.8, 1.);
+    left_sphere.material.diffuse = 0.7;
+    left_sphere.material.specular = 0.7;
+
+    let light = PointLight::new(Color::white(), Tuple::point(-10., 10., -10.));
+
+    let world = World::new(
+        vec![
+            floor,
+            left_wall,
+            right_wall,
+            left_sphere,
+            middle_sphere,
+            right_sphere,
+        ],
+        vec![light],
+    );
+    let camera = Camera::new(
+        resolution,
+        resolution,
+        PI / 3.,
+        view_transform(
+            Tuple::point(0., 1.5, -5.),
+            Tuple::point(0., 1., 0.),
+            Tuple::vec(0., 1., 0.),
+        ),
+    );
+
     (world, camera)
 }
 
@@ -61,7 +124,7 @@ fn main() {
     let mut timer = sdl.timer().unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
 
-    let (world, mut camera) = create_scene(resolution);
+    let (world, mut camera) = create_scene_2(resolution);
     let mut c = SdlCanvas(&mut canvas);
 
     let mut event_pump = sdl.event_pump().unwrap();
@@ -73,14 +136,14 @@ fn main() {
             }
         }
 
-        let ticks = timer.ticks() as f32;
-        let x = (ticks / 1000.).sin();
-        let y = (ticks / 1000.).cos();
-        camera.view_transform = view_transform(
-            Tuple::point(x, y, -10.),
-            Tuple::point(0., 0., 0.),
-            Tuple::vec(0., 1., 0.),
-        );
+        // let ticks = timer.ticks() as f32;
+        // let x = (ticks / 1000.).sin();
+        // let y = (ticks / 1000.).cos();
+        // camera.view_transform = view_transform(
+        //     Tuple::point(x, y, -10.),
+        //     Tuple::point(0., 0., 0.),
+        //     Tuple::vec(0., 1., 0.),
+        // );
 
         camera.render_to(&world, &mut c);
         c.present();
