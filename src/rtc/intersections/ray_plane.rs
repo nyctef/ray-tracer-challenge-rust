@@ -1,18 +1,11 @@
 use crate::*;
 
-impl RayIntersection for Plane {
+impl LocalRayIntersection for Plane {
     // TODO: maybe this should just be a Vec<Intersection> for all implementations?
     type OutputType = Option<Intersection>;
 
-    fn ray_intersection(self, ray: Ray) -> Self::OutputType {
-        // we use the inverse of the plane's transformation to move the ray
-        // into the plane's object space
-
-        let inverse = self.transformation.try_inverse()?;
-        let ray2 = inverse * ray;
-
-        // we now intersect ray2 with the xz unit plane
-        if approx_eq!(f32, ray2.direction.y, 0.) {
+    fn local_ray_intersection(self, ray: Ray) -> Self::OutputType {
+        if approx_eq!(f32, ray.direction.y, 0.) {
             // ray doesn't move in y axis, so it's parallel or coplanar with the xz plane
             return None;
         }

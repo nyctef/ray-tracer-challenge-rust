@@ -32,10 +32,36 @@ impl ApproxEq for Ray {
     }
 }
 
+// do a ray intersection against an object in world space
 pub trait RayIntersection {
     type OutputType;
 
     fn ray_intersection(self, ray: Ray) -> Self::OutputType;
+}
+
+// do a ray intersection against an object in object space
+pub trait LocalRayIntersection {
+    type OutputType;
+
+    fn local_ray_intersection(self, ray: Ray) -> Self::OutputType;
+}
+
+// if we have an object space ray intersection implementation, we can
+// implement one in world space by transforming the ray into local object space
+impl<T: LocalRayIntersection + Shape> RayIntersection for T {
+    type OutputType = T::OutputType;
+
+    fn ray_intersection(self, ray: Ray) -> Self::OutputType {
+        // we use the inverse of the objects's transformation to move the ray
+        // into the object's local (object) space, then do a local ray intersection
+        let inverse = self
+            .transformation()
+            .try_inverse()
+            .expect("Panic! Shape transformation not invertible");
+        let local_ray = inverse * ray;
+
+        self.local_ray_intersection(local_ray)
+    }
 }
 
 impl Mul<Ray> for Matrix4 {

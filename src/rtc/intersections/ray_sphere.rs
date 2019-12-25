@@ -1,19 +1,12 @@
 use crate::*;
 
-impl RayIntersection for Sphere {
+impl LocalRayIntersection for Sphere {
     // the two values are the t parameter for the ray at the intersection point
     type OutputType = Option<[Intersection; 2]>;
 
-    fn ray_intersection(self, ray: Ray) -> Self::OutputType {
-        // we use the inverse of the sphere's transformation to move the ray
-        // into the sphere's object space
-
-        let inverse = self.transformation.try_inverse()?;
-        let ray2 = inverse * ray;
-
-        // now we can intersect ray2 with the unit sphere
-        let sphere_to_ray = ray2.origin - Tuple::point(0., 0., 0.);
-        let dir = ray2.direction;
+    fn local_ray_intersection(self, ray: Ray) -> Self::OutputType {
+        let sphere_to_ray = ray.origin - Tuple::point(0., 0., 0.);
+        let dir = ray.direction;
         let a = dir.dot(dir);
         let b = 2. * dir.dot(sphere_to_ray);
         let c = sphere_to_ray.dot(sphere_to_ray) - 1.;
