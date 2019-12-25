@@ -1,22 +1,19 @@
 use crate::*;
 
 impl LocalRayIntersection for Plane {
-    // TODO: maybe this should just be a Vec<Intersection> for all implementations?
-    type OutputType = Option<Intersection>;
-
-    fn local_ray_intersection(self, ray: Ray) -> Self::OutputType {
+    fn local_ray_intersection(&self, ray: Ray) -> Vec<Intersection> {
         if approx_eq!(f32, ray.direction.y, 0.) {
             // ray doesn't move in y axis, so it's parallel or coplanar with the xz plane
-            return None;
+            return Intersection::none();
         }
 
         // we need to find the t value for the point in the ray where y=0.
         // the ray equation is y = origin_y + direction_y * t
         // therefore we calculate t = -origin_y / direction_y
-        Some(Intersection::ray_plane(
+        vec![Intersection::ray_plane(
             self,
             -ray.origin.y / ray.direction.y,
-        ))
+        )]
     }
 }
 
@@ -30,7 +27,7 @@ mod tests {
     fn ray_parallel_to_plane_misses() {
         let r = Ray::new(Tuple::point(0., 1., 0.), Tuple::vec(0., 0., 1.));
         let p = Plane::xz();
-        assert_eq!(None, p.ray_intersection(r));
+        assert_eq!(Intersection::none(), p.ray_intersection(r));
     }
 
     #[test]
@@ -41,7 +38,7 @@ mod tests {
 
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
         let p = Plane::xz();
-        assert_eq!(None, p.ray_intersection(r));
+        assert_eq!(Intersection::none(), p.ray_intersection(r));
     }
 
     #[test]
@@ -52,7 +49,7 @@ mod tests {
         );
         let p = Plane::xz();
         let s33 = 3_f32.sqrt();
-        let intersection = p.ray_intersection(r).unwrap();
+        let intersection = p.ray_intersection(r)[0];
         assert!(approx_eq!(f32, s33, intersection.t));
     }
 }

@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn light_ray_from_outside_sphere() {
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
-        let shape = Sphere::unit();
+        let shape = &Sphere::unit();
         let hit = Intersection::ray_sphere(shape, 4.);
         let intersection = prepare_computations(&hit, r).unwrap();
 
@@ -280,7 +280,7 @@ mod tests {
     #[test]
     fn light_ray_from_inside_sphere() {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
-        let shape = Sphere::unit();
+        let shape = &Sphere::unit();
         let hit = Intersection::ray_sphere(shape, 1.);
         let intersection = prepare_computations(&hit, r).unwrap();
 
@@ -330,7 +330,7 @@ mod tests {
         let s1 = Sphere::unit();
         let s2 = Sphere::pos_r(Tuple::point(0., 0., 10.), 1.);
         let l = PointLight::new(Color::white(), Tuple::point(0., 0., -10.));
-        let w = World::new(vec![s1, s2], vec![l]);
+        let w = World::new(vec![Box::new(s1), Box::new(s2)], vec![l]);
 
         let hit = light_ray(
             &w,
@@ -364,7 +364,7 @@ mod tests {
         // here we send a ray upwards which hits the bottom of a sphere at z=0
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
         let s = Sphere::pos_r(Tuple::point(0., 0., 1.), 1.);
-        let w = World::new(vec![s], vec![]);
+        let w = World::new(vec![Box::new(s)], vec![]);
         let hit = light_ray(&w, r).unwrap();
 
         // see TODO about large epsilon in prepare_computations

@@ -1,13 +1,18 @@
 use crate::*;
 
-#[derive(Debug, Clone)]
+// this extra type is needed to avoid E0225
+// because of https://github.com/rust-lang/rust/issues/32220
+pub trait IntersectableShape: Shape + RayIntersection {}
+impl<T: Shape + RayIntersection> IntersectableShape for T {}
+
+#[derive(Debug)]
 pub struct World {
-    pub objects: Vec<Sphere>,
+    pub objects: Vec<Box<dyn IntersectableShape>>,
     pub lights: Vec<PointLight>,
 }
 
 impl World {
-    pub fn new(objects: Vec<Sphere>, lights: Vec<PointLight>) -> World {
+    pub fn new(objects: Vec<Box<dyn IntersectableShape>>, lights: Vec<PointLight>) -> World {
         World { objects, lights }
     }
 
@@ -18,7 +23,7 @@ impl World {
         let l1 = PointLight::new(Color::new(1., 1., 1.), Tuple::point(-10., 10., -10.));
 
         World {
-            objects: vec![s1, s2],
+            objects: vec![Box::new(s1), Box::new(s2)],
             lights: vec![l1],
         }
     }

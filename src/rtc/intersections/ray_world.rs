@@ -1,14 +1,12 @@
 use crate::*;
 
 impl RayIntersection for &World {
-    type OutputType = Vec<Intersection>;
-
-    fn ray_intersection(self, ray: Ray) -> Self::OutputType {
+    fn ray_intersection<'a>(&'a self, ray: Ray) -> Vec<Intersection<'a>> {
         let mut result = Vec::<Intersection>::new();
 
         for obj in &self.objects {
-            obj.ray_intersection(ray)
-                .map(|i| result.extend_from_slice(&i));
+            let intersection = obj.ray_intersection(ray);
+            result.extend_from_slice(&intersection);
         }
 
         result.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Equal));

@@ -5,7 +5,7 @@ pub use self::sphere::*;
 mod plane;
 pub use self::plane::*;
 
-pub trait Shape {
+pub trait Shape: std::fmt::Debug {
     fn transformation(&self) -> Matrix4;
     fn material(&self) -> PhongMaterial;
     fn local_normal_at(&self, point: Tuple) -> Tuple;

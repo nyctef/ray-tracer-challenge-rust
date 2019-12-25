@@ -9,33 +9,37 @@ use crate::*;
 use std::cmp::Ordering::Equal;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum IntersectionObject {
-    Sphere(Sphere),
-    Plane(Plane),
+pub enum IntersectionObject<'a> {
+    Sphere(&'a Sphere),
+    Plane(&'a Plane),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct Intersection {
+pub struct Intersection<'a> {
     pub t: f32,
-    pub obj: IntersectionObject,
+    pub obj: IntersectionObject<'a>,
 }
 
-impl Intersection {
-    pub fn ray_sphere(sphere: Sphere, t: f32) -> Intersection {
+impl Intersection<'_> {
+    pub fn none() -> Vec<Intersection<'static>> {
+        vec![]
+    }
+
+    pub fn ray_sphere(sphere: &Sphere, t: f32) -> Intersection {
         Intersection {
             t,
             obj: IntersectionObject::Sphere(sphere),
         }
     }
 
-    pub fn ray_plane(plane: Plane, t: f32) -> Intersection {
+    pub fn ray_plane(plane: &Plane, t: f32) -> Intersection {
         Intersection {
             t,
-            obj: IntersectionObject::Plane(plane),
+            obj: IntersectionObject::Plane(&plane),
         }
     }
 
-    pub fn hit(intersections: &[Intersection]) -> Option<&Intersection> {
+    pub fn hit<'a>(intersections: &'a [Intersection]) -> Option<&'a Intersection<'a>> {
         let mut sorted = intersections
             .iter()
             .filter(|a| a.t >= 0.)
@@ -55,7 +59,7 @@ mod tests {
 
     #[test]
     fn finding_first_hit_from_intersection_list() {
-        let s = Sphere::unit();
+        let s = &Sphere::unit();
 
         // should pick smallest non-negative t value
         let i1 = [
