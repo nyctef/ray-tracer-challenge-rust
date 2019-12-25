@@ -68,6 +68,7 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
 
     let mut surface_normal = match hit.obj {
         IntersectionObject::Sphere(s) => s.normal_at(point),
+        IntersectionObject::Plane(p) => p.normal_at(point),
     };
 
     let mut inside = false;
@@ -83,6 +84,7 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
 
     let material = match hit.obj {
         IntersectionObject::Sphere(s) => s.material,
+        IntersectionObject::Plane(p) => p.material,
     };
     Some(LightHit {
         point,

@@ -2,6 +2,8 @@ mod ray_sphere;
 pub use self::ray_sphere::*;
 mod ray_world;
 pub use self::ray_world::*;
+mod ray_plane;
+pub use self::ray_plane::*;
 
 use crate::*;
 use std::cmp::Ordering::Equal;
@@ -9,6 +11,7 @@ use std::cmp::Ordering::Equal;
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum IntersectionObject {
     Sphere(Sphere),
+    Plane(Plane),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -22,6 +25,13 @@ impl Intersection {
         Intersection {
             t,
             obj: IntersectionObject::Sphere(sphere),
+        }
+    }
+
+    pub fn ray_plane(plane: Plane, t: f32) -> Intersection {
+        Intersection {
+            t,
+            obj: IntersectionObject::Plane(plane),
         }
     }
 
