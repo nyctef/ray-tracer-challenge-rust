@@ -38,20 +38,18 @@ impl Sphere {
             material,
         }
     }
+}
 
-    // TODO: possible trait?
-    pub fn normal_at(&self, position: Tuple) -> Tuple {
-        let world_to_sphere = self
-            .transformation
-            .try_inverse()
-            .expect("Panic! Sphere transformation not invertible!");
+impl Shape for Sphere {
+    fn transformation(&self) -> Matrix4 {
+        self.transformation
+    }
+    fn material(&self) -> PhongMaterial {
+        self.material
+    }
 
-        let object_point = world_to_sphere * position;
-        let object_normal = object_point - Tuple::point(0., 0., 0.);
-        // https://computergraphics.stackexchange.com/a/1506 for `transpose()` justification
-        let mut world_normal = world_to_sphere.transpose() * object_normal;
-        world_normal.w = 0.;
-        return world_normal.normalize();
+    fn local_normal_at(&self, point: Tuple) -> Tuple {
+        point - Tuple::point(0., 0., 0.)
     }
 }
 
