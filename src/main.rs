@@ -6,7 +6,11 @@ use std::f32::consts::PI;
 
 fn create_scene_2(resolution: usize) -> (World, Camera) {
     let mut floor = Plane::xz();
-    floor.material.pattern = Pattern::Stripe(Stripe::new(red(), white(), rotation_y(PI / 4.)));
+    floor.material.pattern = Pattern::Stripe(Stripe::new(
+        red(),
+        white(),
+        rotation_y(PI / 4.) * scaling(0.1, 0.1, 0.1),
+    ));
     floor.material.specular = 0.;
 
     let mut left_wall =
@@ -16,11 +20,7 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
 
     let mut right_wall =
         Plane::t(translation(0., 0., 5.) * rotation_y(PI / 4.) * rotation_x(PI / 2.));
-    right_wall.material.pattern = Pattern::Stripe(Stripe::new(
-        red(),
-        white(),
-        scaling(2., 1., 1.) * rotation_z(PI / 2.),
-    ));
+    right_wall.material.pattern = Pattern::Stripe(Stripe::col(red(), white()));
 
     let mut middle_sphere = Sphere::pos_r(point(-1.5, 1., 0.5), 1.);
     middle_sphere.material.pattern = Pattern::Stripe(Stripe::col(red(), white()));
