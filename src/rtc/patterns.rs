@@ -155,6 +155,43 @@ impl SamplePattern for Ring {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Checkerboard {
+    a: Color,
+    b: Color,
+    // transformation from object space to pattern space
+    object_to_pattern: Matrix4,
+}
+impl Checkerboard {
+    pub fn new(a: Color, b: Color, transform: Matrix4) -> Checkerboard {
+        let object_to_pattern = transform
+            .try_inverse()
+            .expect("Stripe transform needs to be invertible");
+
+        Checkerboard {
+            a,
+            b,
+            object_to_pattern,
+        }
+    }
+
+    pub fn col(a: Color, b: Color) -> Checkerboard {
+        Checkerboard::new(a, b, Matrix4::identity())
+    }
+}
+impl SamplePattern for Checkerboard {
+    fn sample_pattern_at(&self, p: Tuple) -> Color {
+        let p2 = self.object_to_pattern * p;
+
+        let fac = p2.x.floor() + p2.y.floor() + p2.z.floor();
+        if fac % 2. == 0. {
+            self.a
+        } else {
+            self.b
+        }
+    }
+}
+
 // ended up going with a different implementation
 // pub fn sample_pattern_at_object(p: Pattern, s: &dyn Shape, point: Tuple) -> Color {
 //     let object_point = s.world_to_object() * point;
@@ -236,5 +273,22 @@ mod tests {
         assert_eq!(white(), p.sample_pattern_at(point(0.5, 0., 0.)));
         assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.5)));
         assert_eq!(black(), p.sample_pattern_at(point(1., 0., 1.)));
+    }
+
+    #[test]
+    fn checkerboard_repeats_in_each_dimension() {
+        let p = Checkerboard::col(white(), black());
+
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0.99, 0.)));
+        assert_eq!(black(), p.sample_pattern_at(point(0., 1.01, 0.)));
+
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(0.99, 0., 0.)));
+        assert_eq!(black(), p.sample_pattern_at(point(1.01, 0., 0.)));
+
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.99)));
+        assert_eq!(black(), p.sample_pattern_at(point(0., 0., 1.01)));
     }
 }
