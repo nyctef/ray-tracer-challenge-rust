@@ -50,8 +50,9 @@ impl Default for PhongMaterial {
 
 #[derive(Debug, Clone)]
 struct LightHit {
-    pub point: Tuple,
-    // a point slightly above the surface, used to cast shadow rays
+    pub world_point: Tuple,
+    pub object_point: Tuple,
+    // a point slightly above the surface in world space, used to cast shadow rays
     pub over_point: Tuple,
     pub surface_normal: Tuple,
     pub to_eye: Tuple,
@@ -62,11 +63,12 @@ struct LightHit {
 }
 
 fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
-    let point = ray.position(hit.t);
+    let world_point = ray.position(hit.t);
+    let object_point = hit.obj.world_to_object() * world_point;
 
     let to_eye = -ray.direction;
 
-    let mut surface_normal = hit.obj.normal_at(point);
+    let mut surface_normal = hit.obj.normal_at(world_point);
 
     let mut inside = false;
     if surface_normal.dot(to_eye) < 0. {
@@ -77,12 +79,13 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
     }
 
     // TODO: this epsilon seems a bit big, but smaller values cause lots of artifacts
-    let over_point = point + (surface_normal.normalize() * 0.0001);
+    let over_point = world_point + (surface_normal.normalize() * 0.0001);
 
     let material = hit.obj.material();
 
     Some(LightHit {
-        point,
+        world_point,
+        object_point,
         over_point,
         surface_normal,
         material,
@@ -97,23 +100,23 @@ fn light_ray(world: &World, ray: Ray) -> Option<LightHit> {
     prepare_computations(hit, ray)
 }
 
-// TODO: traits for material, light, etc?
 fn lighting(
     material: PhongMaterial,
     light: PointLight,
-    surface_position: Tuple,
+    world_point: Tuple,
+    object_point: Tuple,
     eye: Tuple,
     surface_normal: Tuple,
     is_shadow: bool,
 ) -> Color {
-    assert!(surface_position.is_point());
+    assert!(world_point.is_point());
     // `eye` is a vector from `surface_position` to the eye position
     assert!(eye.is_vec());
     assert!(surface_normal.is_vec());
 
-    let color = material.pattern.sample_pattern_at(surface_position);
+    let color = material.pattern.sample_pattern_at(object_point);
     let effective_color = color * light.intensity;
-    let light_direction = (light.position - surface_position).normalize();
+    let light_direction = (light.position - world_point).normalize();
     let ambient = effective_color * material.ambient;
 
     if is_shadow {
@@ -152,7 +155,8 @@ fn shade_hit(world: &World, hit: LightHit) -> Color {
         result += lighting(
             hit.material,
             *light,
-            hit.point,
+            hit.world_point,
+            hit.object_point,
             hit.to_eye,
             hit.surface_normal,
             is_shadowed,
@@ -200,7 +204,15 @@ mod tests {
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., -10.));
-        let result = lighting(material, light, surface_position, eye, normal, false);
+        let result = lighting(
+            material,
+            light,
+            surface_position,
+            surface_position,
+            eye,
+            normal,
+            false,
+        );
         // result is ambient + diffuse + specular
         assert_color_eq!(Color::new(1.9, 1.9, 1.9), result, epsilon = 0.0001);
     }
@@ -213,7 +225,15 @@ mod tests {
         let eye = vec(0., s22, s22);
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., -10.));
-        let result = lighting(material, light, surface_position, eye, normal, false);
+        let result = lighting(
+            material,
+            light,
+            surface_position,
+            surface_position,
+            eye,
+            normal,
+            false,
+        );
         // the surface is still fully lit, but we no longer see the specular highlight
         assert_color_eq!(Color::new(1., 1., 1.), result, epsilon = 0.0001);
     }
@@ -225,7 +245,15 @@ mod tests {
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 10., -10.));
-        let result = lighting(material, light, surface_position, eye, normal, false);
+        let result = lighting(
+            material,
+            light,
+            surface_position,
+            surface_position,
+            eye,
+            normal,
+            false,
+        );
         // the surface is only partially lit, and we don't see a specular highlight
         assert_color_eq!(Color::new(0.7364, 0.7364, 0.7364), result, epsilon = 0.0001);
     }
@@ -238,7 +266,15 @@ mod tests {
         let eye = vec(0., -s22, -s22);
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 10., -10.));
-        let result = lighting(material, light, surface_position, eye, normal, false);
+        let result = lighting(
+            material,
+            light,
+            surface_position,
+            surface_position,
+            eye,
+            normal,
+            false,
+        );
         // the surface is partially lit again
         // since the eye is now in the path of the light's reflection, we get the specular highlight back
         let expected = 0.7364 + 0.9;
@@ -257,7 +293,15 @@ mod tests {
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., 10.));
-        let result = lighting(material, light, surface_position, eye, normal, false);
+        let result = lighting(
+            material,
+            light,
+            surface_position,
+            surface_position,
+            eye,
+            normal,
+            false,
+        );
         // only the ambient light is present
         assert_color_eq!(Color::new(0.1, 0.1, 0.1), result, epsilon = 0.0001);
     }
@@ -342,7 +386,15 @@ mod tests {
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., -10.));
         let is_shadow = true;
-        let result = lighting(material, light, surface_position, eye, normal, is_shadow);
+        let result = lighting(
+            material,
+            light,
+            surface_position,
+            surface_position,
+            eye,
+            normal,
+            is_shadow,
+        );
         // result is just ambient
         assert_color_eq!(Color::new(0.1, 0.1, 0.1), result, epsilon = 0.0001);
     }
@@ -361,7 +413,7 @@ mod tests {
 
         // see TODO about large epsilon in prepare_computations
         assert!(hit.over_point.z > -0.0002);
-        assert!(hit.point.z > hit.over_point.z);
+        assert!(hit.world_point.z > hit.over_point.z);
     }
 
     mod is_shadowed {
