@@ -25,3 +25,5 @@ mod world;
 pub use self::world::*;
 mod camera;
 pub use self::camera::*;
+mod patterns;
+pub use self::patterns::*;
