@@ -84,6 +84,77 @@ impl SamplePattern for Stripe {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Gradient {
+    a: Color,
+    b: Color,
+    // transformation from object space to pattern space
+    object_to_pattern: Matrix4,
+}
+impl Gradient {
+    pub fn new(a: Color, b: Color, transform: Matrix4) -> Gradient {
+        let object_to_pattern = transform
+            .try_inverse()
+            .expect("Stripe transform needs to be invertible");
+
+        Gradient {
+            a,
+            b,
+            object_to_pattern,
+        }
+    }
+
+    pub fn col(a: Color, b: Color) -> Gradient {
+        Gradient::new(a, b, Matrix4::identity())
+    }
+}
+impl SamplePattern for Gradient {
+    fn sample_pattern_at(&self, p: Tuple) -> Color {
+        let p2 = self.object_to_pattern * p;
+
+        let a_fac = 1. - 0_f32.max(p2.x).min(1.);
+        let b_fac = 1. - a_fac;
+        (self.a * a_fac + self.b * b_fac).clamp()
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Ring {
+    a: Color,
+    b: Color,
+    // transformation from object space to pattern space
+    object_to_pattern: Matrix4,
+}
+impl Ring {
+    pub fn new(a: Color, b: Color, transform: Matrix4) -> Ring {
+        let object_to_pattern = transform
+            .try_inverse()
+            .expect("Stripe transform needs to be invertible");
+
+        Ring {
+            a,
+            b,
+            object_to_pattern,
+        }
+    }
+
+    pub fn col(a: Color, b: Color) -> Ring {
+        Ring::new(a, b, Matrix4::identity())
+    }
+}
+impl SamplePattern for Ring {
+    fn sample_pattern_at(&self, p: Tuple) -> Color {
+        let p2 = self.object_to_pattern * p;
+
+        let fac = (p2.x * p2.x + p2.z * p2.z).sqrt();
+        if fac.floor() % 2. == 0. {
+            self.a
+        } else {
+            self.b
+        }
+    }
+}
+
 // ended up going with a different implementation
 // pub fn sample_pattern_at_object(p: Pattern, s: &dyn Shape, point: Tuple) -> Color {
 //     let object_point = s.world_to_object() * point;
@@ -145,4 +216,25 @@ mod tests {
     //     assert_eq!(white(), sample_pattern_at_object(p, s, point(4., 0., 0.)));
     //     assert_eq!(white(), sample_pattern_at_object(p, s, point(5., 0., 0.)));
     // }
+
+    #[test]
+    fn gradient_lerps_between_colors_on_x_axis() {
+        let g = Gradient::col(black(), white());
+
+        assert_eq!(black(), g.sample_pattern_at(point(0., 0., 0.)));
+        assert_eq!(grey(0.25), g.sample_pattern_at(point(0.25, 0., 0.)));
+        assert_eq!(grey(0.50), g.sample_pattern_at(point(0.50, 0., 0.)));
+        assert_eq!(grey(0.75), g.sample_pattern_at(point(0.75, 0., 0.)));
+        assert_eq!(white(), g.sample_pattern_at(point(1., 0., 0.)));
+    }
+
+    #[test]
+    fn ring_pattern_uses_x_and_z_values() {
+        let p = Ring::col(white(), black());
+
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(0.5, 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.5)));
+        assert_eq!(black(), p.sample_pattern_at(point(1., 0., 1.)));
+    }
 }
