@@ -6,7 +6,7 @@ use std::f32::consts::PI;
 
 fn create_scene_2(resolution: usize) -> (World, Camera) {
     let mut floor = Plane::xz();
-    floor.material.color = solid(Color::new(1., 0.9, 0.9));
+    floor.material.pattern = solid(Color::new(1., 0.9, 0.9));
     floor.material.specular = 0.;
 
     let mut left_wall = Plane::xz();
@@ -17,17 +17,17 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
     right_wall.transformation = translation(0., 0., 5.) * rotation_y(PI / 4.) * rotation_x(PI / 2.);
 
     let mut middle_sphere = Sphere::pos_r(point(-1.5, 1., 0.5), 1.);
-    middle_sphere.material.color = solid(Color::new(0.1, 1., 0.5));
+    middle_sphere.material.pattern = solid(Color::new(0.1, 1., 0.5));
     middle_sphere.material.diffuse = 0.7;
     middle_sphere.material.specular = 0.3;
 
     let mut right_sphere = Sphere::pos_r(point(1.5, 0.5, -0.5), 0.5);
-    right_sphere.material.color = solid(Color::new(0.5, 1., 0.1));
+    right_sphere.material.pattern = solid(Color::new(0.5, 1., 0.1));
     right_sphere.material.diffuse = 0.7;
     right_sphere.material.specular = 0.3;
 
     let mut left_sphere = Sphere::pos_r(point(-1.5, 0.33, -0.75), 0.33);
-    left_sphere.material.color = solid(Color::new(1., 0.8, 1.));
+    left_sphere.material.pattern = solid(Color::new(1., 0.8, 1.));
     left_sphere.material.diffuse = 0.7;
     left_sphere.material.specular = 0.7;
 

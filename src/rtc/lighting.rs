@@ -17,7 +17,7 @@ impl PointLight {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PhongMaterial {
-    pub color: Pattern,
+    pub pattern: Pattern,
     pub ambient: f32,
     pub diffuse: f32,
     pub specular: f32,
@@ -25,7 +25,7 @@ pub struct PhongMaterial {
 }
 
 impl PhongMaterial {
-    pub fn new(
+    pub fn solid(
         color: Color,
         ambient: f32,
         diffuse: f32,
@@ -33,7 +33,7 @@ impl PhongMaterial {
         shininess: f32,
     ) -> PhongMaterial {
         PhongMaterial {
-            color: solid(color),
+            pattern: solid(color),
             ambient,
             diffuse,
             specular,
@@ -44,7 +44,7 @@ impl PhongMaterial {
 
 impl Default for PhongMaterial {
     fn default() -> PhongMaterial {
-        PhongMaterial::new(white(), 0.1, 0.9, 0.9, 200.)
+        PhongMaterial::solid(white(), 0.1, 0.9, 0.9, 200.)
     }
 }
 
@@ -116,7 +116,7 @@ fn lighting(
     assert!(eye.is_vec());
     assert!(surface_normal.is_vec());
 
-    let color = material.color.sample_pattern_at(surface_position);
+    let color = material.pattern.sample_pattern_at(surface_position);
     let effective_color = color * light.intensity;
     let light_direction = (light.position - surface_position).normalize();
     let ambient = effective_color * material.ambient;
