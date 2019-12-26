@@ -31,7 +31,7 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
     left_sphere.material.diffuse = 0.7;
     left_sphere.material.specular = 0.7;
 
-    let light = PointLight::new(Color::white(), point(-10., 10., -10.));
+    let light = PointLight::new(white(), point(-10., 10., -10.));
 
     let world = World::new(
         vec![

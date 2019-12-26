@@ -20,7 +20,7 @@ impl World {
         let mut s1 = Sphere::unit();
         s1.material = PhongMaterial::new(Color::new(0.8, 1., 0.6), 0.1, 0.7, 0.2, 200.);
         let s2 = Sphere::pos_r(point(0., 0., 0.), 0.5);
-        let l1 = PointLight::new(Color::new(1., 1., 1.), point(-10., 10., -10.));
+        let l1 = PointLight::new(white(), point(-10., 10., -10.));
 
         World {
             objects: vec![Box::new(s1), Box::new(s2)],

@@ -47,7 +47,7 @@ impl PpmCanvas {
     }
 
     pub fn new(width: usize, height: usize) -> Self {
-        let grid = vec![vec![Color::black(); width]; height];
+        let grid = vec![vec![black(); width]; height];
         PpmCanvas {
             width,
             height,
@@ -72,7 +72,7 @@ pub struct PngCanvas {
 }
 impl PngCanvas {
     pub fn new(width: usize, height: usize) -> Self {
-        let grid = vec![vec![Color::black(); width]; height];
+        let grid = vec![vec![black(); width]; height];
         PngCanvas {
             width,
             height,

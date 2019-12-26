@@ -14,16 +14,6 @@ impl Color {
         Color { r, g, b }
     }
 
-    pub fn black() -> Color {
-        Color::new(0.0, 0.0, 0.0)
-    }
-    pub fn red() -> Color {
-        Color::new(1.0, 0.0, 0.0)
-    }
-    pub fn white() -> Color {
-        Color::new(1.0, 1.0, 1.0)
-    }
-
     pub fn set(&mut self, other: &Color) {
         self.r = other.r;
         self.g = other.g;
@@ -45,6 +35,19 @@ impl Color {
             (self.b * 255.).round() as u8,
         )
     }
+}
+
+pub fn black() -> Color {
+    Color::new(0.0, 0.0, 0.0)
+}
+pub fn red() -> Color {
+    Color::new(1.0, 0.0, 0.0)
+}
+pub fn white() -> Color {
+    Color::new(1.0, 1.0, 1.0)
+}
+pub fn grey(x: f32) -> Color {
+    Color::new(x, x, x)
 }
 
 fn clamp(value: f32, min: f32, max: f32) -> f32 {

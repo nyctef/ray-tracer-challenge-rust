@@ -44,7 +44,7 @@ impl PhongMaterial {
 
 impl Default for PhongMaterial {
     fn default() -> PhongMaterial {
-        PhongMaterial::new(Color::new(1., 1., 1.), 0.1, 0.9, 0.9, 200.)
+        PhongMaterial::new(white(), 0.1, 0.9, 0.9, 200.)
     }
 }
 
@@ -126,15 +126,15 @@ fn lighting(
 
     let cos_light_angle = light_direction.dot(surface_normal);
     let diffuse = match cos_light_angle {
-        x if x < 0. => Color::black(), // light is behind surface normal
+        x if x < 0. => black(),                      // light is behind surface normal
         x => effective_color * material.diffuse * x, // light is in front, modified by angle
     };
     let specular = match cos_light_angle {
-        x if x < 0. => Color::black(),
+        x if x < 0. => black(),
         _ => {
             let cos_reflection_angle = reflect(-light_direction, surface_normal).dot(eye);
             match cos_reflection_angle {
-                x if x < 0. => Color::black(),
+                x if x < 0. => black(),
                 x => {
                     let factor = x.powf(material.shininess);
                     light.intensity * material.specular * factor
@@ -147,7 +147,7 @@ fn lighting(
 }
 
 fn shade_hit(world: &World, hit: LightHit) -> Color {
-    let mut result = Color::black();
+    let mut result = black();
 
     for light in &world.lights {
         // TODO: is_shadowed should probably take a light instead of a world
@@ -169,7 +169,7 @@ fn shade_hit(world: &World, hit: LightHit) -> Color {
 pub fn color_at(world: &World, ray: Ray) -> Color {
     light_ray(world, ray)
         .map(|h| shade_hit(world, h))
-        .unwrap_or(Color::black())
+        .unwrap_or(black())
 }
 
 fn is_shadowed(world: &World, point: Tuple) -> bool {
@@ -203,7 +203,7 @@ mod tests {
         let surface_position = point(0., 0., 0.);
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
-        let light = PointLight::new(Color::white(), point(0., 0., -10.));
+        let light = PointLight::new(white(), point(0., 0., -10.));
         let result = lighting(material, light, surface_position, eye, normal, false);
         // result is ambient + diffuse + specular
         assert_color_eq!(Color::new(1.9, 1.9, 1.9), result, epsilon = 0.0001);
@@ -216,7 +216,7 @@ mod tests {
         let s22 = 2_f32.sqrt() / 2.;
         let eye = vec(0., s22, s22);
         let normal = vec(0., 0., -1.);
-        let light = PointLight::new(Color::white(), point(0., 0., -10.));
+        let light = PointLight::new(white(), point(0., 0., -10.));
         let result = lighting(material, light, surface_position, eye, normal, false);
         // the surface is still fully lit, but we no longer see the specular highlight
         assert_color_eq!(Color::new(1., 1., 1.), result, epsilon = 0.0001);
@@ -228,7 +228,7 @@ mod tests {
         let surface_position = point(0., 0., 0.);
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
-        let light = PointLight::new(Color::white(), point(0., 10., -10.));
+        let light = PointLight::new(white(), point(0., 10., -10.));
         let result = lighting(material, light, surface_position, eye, normal, false);
         // the surface is only partially lit, and we don't see a specular highlight
         assert_color_eq!(Color::new(0.7364, 0.7364, 0.7364), result, epsilon = 0.0001);
@@ -241,7 +241,7 @@ mod tests {
         let s22 = 2_f32.sqrt() / 2.;
         let eye = vec(0., -s22, -s22);
         let normal = vec(0., 0., -1.);
-        let light = PointLight::new(Color::white(), point(0., 10., -10.));
+        let light = PointLight::new(white(), point(0., 10., -10.));
         let result = lighting(material, light, surface_position, eye, normal, false);
         // the surface is partially lit again
         // since the eye is now in the path of the light's reflection, we get the specular highlight back
@@ -260,7 +260,7 @@ mod tests {
         let surface_position = point(0., 0., 0.);
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
-        let light = PointLight::new(Color::white(), point(0., 0., 10.));
+        let light = PointLight::new(white(), point(0., 0., 10.));
         let result = lighting(material, light, surface_position, eye, normal, false);
         // only the ambient light is present
         assert_color_eq!(Color::new(0.1, 0.1, 0.1), result, epsilon = 0.0001);
@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn shade_hit_from_inside_sphere() {
         let mut w = World::default();
-        w.lights[0] = PointLight::new(Color::white(), point(0., 0.25, 0.));
+        w.lights[0] = PointLight::new(white(), point(0., 0.25, 0.));
         let r = Ray::new(point(0., 0., 0.), vec(0., 0., 1.));
         let hit = light_ray(&w, r).unwrap();
         let color = shade_hit(&w, hit);
@@ -329,14 +329,10 @@ mod tests {
     fn shade_hit_with_an_intersection_in_shadow() {
         let s1 = Sphere::unit();
         let s2 = Sphere::pos_r(point(0., 0., 10.), 1.);
-        let l = PointLight::new(Color::white(), point(0., 0., -10.));
+        let l = PointLight::new(white(), point(0., 0., -10.));
         let w = World::new(vec![Box::new(s1), Box::new(s2)], vec![l]);
 
-        let hit = light_ray(
-            &w,
-            Ray::new(point(0., 0., 5.), vec(0., 0., 1.)),
-        )
-        .unwrap();
+        let hit = light_ray(&w, Ray::new(point(0., 0., 5.), vec(0., 0., 1.))).unwrap();
 
         let c = shade_hit(&w, hit);
         assert_eq!(Color::new(0.1, 0.1, 0.1), c);
@@ -348,7 +344,7 @@ mod tests {
         let surface_position = point(0., 0., 0.);
         let eye = vec(0., 0., -1.);
         let normal = vec(0., 0., -1.);
-        let light = PointLight::new(Color::white(), point(0., 0., -10.));
+        let light = PointLight::new(white(), point(0., 0., -10.));
         let is_shadow = true;
         let result = lighting(material, light, surface_position, eye, normal, is_shadow);
         // result is just ambient
