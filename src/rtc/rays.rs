@@ -48,11 +48,7 @@ impl<T: LocalRayIntersection + Shape> RayIntersection for T {
     fn ray_intersection(&self, ray: Ray) -> Vec<Intersection> {
         // we use the inverse of the objects's transformation to move the ray
         // into the object's local (object) space, then do a local ray intersection
-        let inverse = self
-            .transformation()
-            .try_inverse()
-            .expect("Panic! Shape transformation not invertible");
-        let local_ray = inverse * ray;
+        let local_ray = self.world_to_object() * ray;
 
         self.local_ray_intersection(local_ray)
     }

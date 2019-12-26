@@ -2,14 +2,17 @@ use crate::*;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Plane {
-    pub transformation: Matrix4,
+    world_to_object: Matrix4,
     pub material: PhongMaterial,
 }
 
 impl Plane {
     pub fn new(transformation: Matrix4, material: PhongMaterial) -> Plane {
+        let world_to_object = transformation
+            .try_inverse()
+            .expect("Panic! Shape transformation not invertible");
         Plane {
-            transformation,
+            world_to_object,
             material,
         }
     }
@@ -17,11 +20,15 @@ impl Plane {
     pub fn xz() -> Plane {
         Plane::new(Matrix4::identity(), PhongMaterial::default())
     }
+
+    pub fn t(transformation: Matrix4) -> Plane {
+        Plane::new(transformation, PhongMaterial::default())
+    }
 }
 
 impl Shape for Plane {
-    fn transformation(&self) -> Matrix4 {
-        self.transformation
+    fn world_to_object(&self) -> Matrix4 {
+        self.world_to_object
     }
     fn material(&self) -> PhongMaterial {
         self.material

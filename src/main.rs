@@ -9,13 +9,13 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
     floor.material.pattern = Pattern::Stripe(Stripe::new(red(), white(), rotation_y(PI / 4.)));
     floor.material.specular = 0.;
 
-    let mut left_wall = Plane::xz();
-    left_wall.transformation = translation(0., 0., 5.) * rotation_y(-PI / 4.) * rotation_x(PI / 2.);
+    let mut left_wall =
+        Plane::t(translation(0., 0., 5.) * rotation_y(-PI / 4.) * rotation_x(PI / 2.));
     left_wall.material = floor.material;
     left_wall.material.pattern = Pattern::Stripe(Stripe::col(red(), white()));
 
-    let mut right_wall = Plane::xz();
-    right_wall.transformation = translation(0., 0., 5.) * rotation_y(PI / 4.) * rotation_x(PI / 2.);
+    let mut right_wall =
+        Plane::t(translation(0., 0., 5.) * rotation_y(PI / 4.) * rotation_x(PI / 2.));
     right_wall.material.pattern = Pattern::Stripe(Stripe::new(
         red(),
         white(),

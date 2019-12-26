@@ -2,47 +2,47 @@ use crate::*;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Sphere {
-    pub transformation: Matrix4,
+    world_to_object: Matrix4,
     pub material: PhongMaterial,
 }
 
 impl Sphere {
     pub fn new(transformation: Matrix4, material: PhongMaterial) -> Sphere {
+        let world_to_object = transformation
+            .try_inverse()
+            .expect("Panic! Shape transformation not invertible");
         Sphere {
-            transformation,
+            world_to_object,
             material,
         }
     }
 
     pub fn unit() -> Sphere {
-        Sphere {
-            transformation: Matrix4::identity(),
-            material: Default::default(),
-        }
+        Sphere::new(Matrix4::identity(), Default::default())
     }
 
     pub fn pos_r(position: Tuple, r: f32) -> Sphere {
-        Sphere {
-            transformation: translation(position.x, position.y, position.z)
+        Sphere::new(
+            translation(position.x, position.y, position.z)
                 * scaling(r, r, r)
                 * Matrix4::identity(),
-            material: Default::default(),
-        }
+            Default::default(),
+        )
     }
 
     pub fn pos_r_m(position: Tuple, r: f32, material: PhongMaterial) -> Sphere {
-        Sphere {
-            transformation: translation(position.x, position.y, position.z)
+        Sphere::new(
+            translation(position.x, position.y, position.z)
                 * scaling(r, r, r)
                 * Matrix4::identity(),
             material,
-        }
+        )
     }
 }
 
 impl Shape for Sphere {
-    fn transformation(&self) -> Matrix4 {
-        self.transformation
+    fn world_to_object(&self) -> Matrix4 {
+        self.world_to_object
     }
     fn material(&self) -> PhongMaterial {
         self.material

@@ -85,8 +85,7 @@ impl SamplePattern for Stripe {
 }
 
 pub fn sample_pattern_at_object(p: Pattern, s: &dyn Shape, point: Tuple) -> Color {
-    // TODO: world_to_object should probably just be a method on Shape
-    let object_point = s.transformation().try_inverse().unwrap() * point;
+    let object_point = s.world_to_object() * point;
     p.sample_pattern_at(object_point)
 }
 
