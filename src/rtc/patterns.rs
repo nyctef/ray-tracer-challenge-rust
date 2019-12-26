@@ -84,6 +84,12 @@ impl SamplePattern for Stripe {
     }
 }
 
+pub fn sample_pattern_at_object(p: Pattern, s: &dyn Shape, point: Tuple) -> Color {
+    // TODO: world_to_object should probably just be a method on Shape
+    let object_point = s.transformation().try_inverse().unwrap() * point;
+    p.sample_pattern_at(object_point)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -114,13 +120,29 @@ mod tests {
         // 2 here means we want the pattern to appear twice as wide on the object
         let p = Stripe::new(white(), black(), scaling(2., 1., 1.));
 
+        assert_eq!(white(), p.sample_pattern_at(point(0., 0., 0.)));
         assert_eq!(white(), p.sample_pattern_at(point(1., 0., 0.)));
-        assert_eq!(white(), p.sample_pattern_at(point(2., 0., 0.)));
 
+        assert_eq!(black(), p.sample_pattern_at(point(2., 0., 0.)));
         assert_eq!(black(), p.sample_pattern_at(point(3., 0., 0.)));
-        assert_eq!(black(), p.sample_pattern_at(point(4., 0., 0.)));
 
+        assert_eq!(white(), p.sample_pattern_at(point(4., 0., 0.)));
         assert_eq!(white(), p.sample_pattern_at(point(5., 0., 0.)));
-        assert_eq!(white(), p.sample_pattern_at(point(6., 0., 0.)));
+    }
+
+    #[test]
+    fn apply_stripe_to_object_with_object_transform() {
+        // the object is twice as big, so the pattern again should appear twice as wide
+        let s = &Sphere::pos_r(point(0., 0., 0.), 2.);
+        let p = Pattern::Stripe(Stripe::col(white(), black()));
+
+        assert_eq!(white(), sample_pattern_at_object(p, s, point(0., 0., 0.)));
+        assert_eq!(white(), sample_pattern_at_object(p, s, point(1., 0., 0.)));
+
+        assert_eq!(black(), sample_pattern_at_object(p, s, point(2., 0., 0.)));
+        assert_eq!(black(), sample_pattern_at_object(p, s, point(3., 0., 0.)));
+
+        assert_eq!(white(), sample_pattern_at_object(p, s, point(4., 0., 0.)));
+        assert_eq!(white(), sample_pattern_at_object(p, s, point(5., 0., 0.)));
     }
 }
