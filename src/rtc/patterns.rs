@@ -50,17 +50,33 @@ impl SamplePattern for SolidColor {
 pub struct Stripe {
     a: Color,
     b: Color,
+    // transformation from object space to pattern space
+    object_to_pattern: Matrix4,
 }
 
 impl Stripe {
-    pub fn new(a: Color, b: Color) -> Stripe {
-        Stripe { a, b }
+    pub fn new(a: Color, b: Color, transform: Matrix4) -> Stripe {
+        let object_to_pattern = transform
+            .try_inverse()
+            .expect("Stripe transform needs to be invertible");
+
+        Stripe {
+            a,
+            b,
+            object_to_pattern,
+        }
+    }
+
+    pub fn col(a: Color, b: Color) -> Stripe {
+        Stripe::new(a, b, Matrix4::identity())
     }
 }
 
 impl SamplePattern for Stripe {
     fn sample_pattern_at(&self, p: Tuple) -> Color {
-        if p.x.floor() % 2. == 0. {
+        let p2 = self.object_to_pattern * p;
+
+        if p2.x.floor() % 2. == 0. {
             self.a
         } else {
             self.b
@@ -74,7 +90,7 @@ mod tests {
 
     #[test]
     fn stripe_pattern_alternates_in_x() {
-        let p = Stripe::new(white(), black());
+        let p = Stripe::col(white(), black());
         // stripe is constant in y
         assert_eq!(white(), p.sample_pattern_at(point(0., 1., 0.)));
         assert_eq!(white(), p.sample_pattern_at(point(0., 2., 0.)));
@@ -91,5 +107,20 @@ mod tests {
         assert_eq!(white(), p.sample_pattern_at(point(2., 0., 0.)));
         assert_eq!(white(), p.sample_pattern_at(point(2.5, 0., 0.)));
         assert_eq!(black(), p.sample_pattern_at(point(3., 0., 0.)));
+    }
+
+    #[test]
+    fn stripe_pattern_with_pattern_transform() {
+        // 2 here means we want the pattern to appear twice as wide on the object
+        let p = Stripe::new(white(), black(), scaling(2., 1., 1.));
+
+        assert_eq!(white(), p.sample_pattern_at(point(1., 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(2., 0., 0.)));
+
+        assert_eq!(black(), p.sample_pattern_at(point(3., 0., 0.)));
+        assert_eq!(black(), p.sample_pattern_at(point(4., 0., 0.)));
+
+        assert_eq!(white(), p.sample_pattern_at(point(5., 0., 0.)));
+        assert_eq!(white(), p.sample_pattern_at(point(6., 0., 0.)));
     }
 }
