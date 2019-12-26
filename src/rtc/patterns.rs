@@ -13,12 +13,18 @@ pub trait SamplePattern {
 pub enum Pattern {
     Solid(SolidColor),
     Stripe(Stripe),
+    Gradient(Gradient),
+    Ring(Ring),
+    Checkerboard(Checkerboard),
 }
 impl SamplePattern for Pattern {
     fn sample_pattern_at(&self, p: Tuple) -> Color {
         match self {
             Pattern::Solid(s) => s.sample_pattern_at(p),
             Pattern::Stripe(s) => s.sample_pattern_at(p),
+            Pattern::Gradient(g) => g.sample_pattern_at(p),
+            Pattern::Ring(r) => r.sample_pattern_at(p),
+            Pattern::Checkerboard(c) => c.sample_pattern_at(p),
         }
     }
 }
