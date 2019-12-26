@@ -192,12 +192,6 @@ impl SamplePattern for Checkerboard {
     }
 }
 
-// ended up going with a different implementation
-// pub fn sample_pattern_at_object(p: Pattern, s: &dyn Shape, point: Tuple) -> Color {
-//     let object_point = s.world_to_object() * point;
-//     p.sample_pattern_at(object_point)
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -237,22 +231,6 @@ mod tests {
         assert_eq!(white(), p.sample_pattern_at(point(4., 0., 0.)));
         assert_eq!(white(), p.sample_pattern_at(point(5., 0., 0.)));
     }
-
-    // #[test]
-    // fn apply_stripe_to_object_with_object_transform() {
-    //     // the object is twice as big, so the pattern again should appear twice as wide
-    //     let s = &Sphere::pos_r(point(0., 0., 0.), 2.);
-    //     let p = Pattern::Stripe(Stripe::col(white(), black()));
-
-    //     assert_eq!(white(), sample_pattern_at_object(p, s, point(0., 0., 0.)));
-    //     assert_eq!(white(), sample_pattern_at_object(p, s, point(1., 0., 0.)));
-
-    //     assert_eq!(black(), sample_pattern_at_object(p, s, point(2., 0., 0.)));
-    //     assert_eq!(black(), sample_pattern_at_object(p, s, point(3., 0., 0.)));
-
-    //     assert_eq!(white(), sample_pattern_at_object(p, s, point(4., 0., 0.)));
-    //     assert_eq!(white(), sample_pattern_at_object(p, s, point(5., 0., 0.)));
-    // }
 
     #[test]
     fn gradient_lerps_between_colors_on_x_axis() {
