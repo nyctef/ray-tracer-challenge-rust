@@ -7,7 +7,8 @@ pub trait SamplePattern {
 }
 
 // this enum/impl pair means we can put Pattern directly into a struct
-// without having to worry about boxing+lifetimes or trait objects
+// without having to worry about boxing+lifetimes or trait objects.
+// see https://users.rust-lang.org/t/11957 for inspiration + some discussion on this idea
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Pattern {
     Solid(SolidColor),
@@ -21,6 +22,8 @@ impl SamplePattern for Pattern {
         }
     }
 }
+
+// TODO: uv-test-pattern-style coordinate pattern?
 
 pub fn solid(color: Color) -> Pattern {
     Pattern::Solid(SolidColor::new(color))
