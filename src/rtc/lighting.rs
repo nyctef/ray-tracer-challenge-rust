@@ -66,10 +66,7 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
 
     let to_eye = -ray.direction;
 
-    let mut surface_normal = match hit.obj {
-        IntersectionObject::Sphere(s) => s.normal_at(point),
-        IntersectionObject::Plane(p) => p.normal_at(point),
-    };
+    let mut surface_normal = hit.obj.normal_at(point);
 
     let mut inside = false;
     if surface_normal.dot(to_eye) < 0. {
@@ -82,10 +79,8 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
     // TODO: this epsilon seems a bit big, but smaller values cause lots of artifacts
     let over_point = point + (surface_normal.normalize() * 0.0001);
 
-    let material = match hit.obj {
-        IntersectionObject::Sphere(s) => s.material,
-        IntersectionObject::Plane(p) => p.material,
-    };
+    let material = hit.obj.material();
+
     Some(LightHit {
         point,
         over_point,

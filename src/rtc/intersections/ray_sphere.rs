@@ -35,40 +35,22 @@ mod tests {
         // normal hit
         let r1 = Ray::new(point(0., 0., -5.), vec(0., 0., 1.));
         let i1 = s.ray_intersection(r1);
-        assert_eq!(
-            vec![
-                Intersection::ray_sphere(&s, 4.),
-                Intersection::ray_sphere(&s, 6.)
-            ],
-            i1
-        );
+        assert_eq!(vec![4., 6.], i1.iter().map(|x| x.t).collect::<Vec<_>>());
 
         // tangent hit still produces two collision points
         let r2 = Ray::new(point(0., 1., -5.), vec(0., 0., 1.));
         let i2 = s.ray_intersection(r2);
-        assert_eq!(
-            vec![
-                Intersection::ray_sphere(&s, 5.),
-                Intersection::ray_sphere(&s, 5.)
-            ],
-            i2
-        );
+        assert_eq!(vec![5., 5.], i2.iter().map(|x| x.t).collect::<Vec<_>>());
 
         // missing entirely
         let r3 = Ray::new(point(0., 2., -5.), vec(0., 0., 1.));
         let i3 = s.ray_intersection(r3);
-        assert_eq!(Intersection::none(), i3);
+        assert_eq!(0, i3.len());
 
         // a ray can intersect from behind its origin point
         let r4 = Ray::new(point(0., 0., 5.), vec(0., 0., 1.));
         let i4 = s.ray_intersection(r4);
-        assert_eq!(
-            vec![
-                Intersection::ray_sphere(&s, -6.),
-                Intersection::ray_sphere(&s, -4.)
-            ],
-            i4
-        );
+        assert_eq!(vec![-6., -4.], i4.iter().map(|x| x.t).collect::<Vec<_>>());
     }
 
     #[test]
@@ -76,17 +58,11 @@ mod tests {
         let r1 = Ray::new(point(0., 0., -5.), vec(0., 0., 1.));
         let s1 = Sphere::pos_r(point(0., 0., 0.), 2.);
         let i1 = s1.ray_intersection(r1);
-        assert_eq!(
-            vec![
-                Intersection::ray_sphere(&s1, 3.),
-                Intersection::ray_sphere(&s1, 7.)
-            ],
-            i1
-        );
+        assert_eq!(vec![3., 7.], i1.iter().map(|x| x.t).collect::<Vec<_>>());
 
         let r2 = Ray::new(point(0., 0., -5.), vec(0., 0., 1.));
         let s2 = Sphere::pos_r(point(5., 0., 0.), 1.);
         let i2 = s2.ray_intersection(r2);
-        assert_eq!(Intersection::none(), i2);
+        assert_eq!(0, i2.len());
     }
 }

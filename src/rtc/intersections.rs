@@ -8,16 +8,10 @@ pub use self::ray_plane::*;
 use crate::*;
 use std::cmp::Ordering::Equal;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum IntersectionObject<'a> {
-    Sphere(&'a Sphere),
-    Plane(&'a Plane),
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Intersection<'a> {
     pub t: f32,
-    pub obj: IntersectionObject<'a>,
+    pub obj: &'a (dyn Shape + 'a),
 }
 
 impl Intersection<'_> {
@@ -26,17 +20,11 @@ impl Intersection<'_> {
     }
 
     pub fn ray_sphere(sphere: &Sphere, t: f32) -> Intersection {
-        Intersection {
-            t,
-            obj: IntersectionObject::Sphere(sphere),
-        }
+        Intersection { t, obj: sphere }
     }
 
     pub fn ray_plane(plane: &Plane, t: f32) -> Intersection {
-        Intersection {
-            t,
-            obj: IntersectionObject::Plane(&plane),
-        }
+        Intersection { t, obj: plane }
     }
 
     pub fn hit<'a>(intersections: &'a [Intersection]) -> Option<&'a Intersection<'a>> {
@@ -67,14 +55,14 @@ mod tests {
             Intersection::ray_sphere(s, 2.),
         ];
         let h1 = Intersection::hit(&i1);
-        assert_eq!(&i1[0], h1.unwrap());
+        assert_eq!(1., h1.unwrap().t);
 
         let i2 = [
             Intersection::ray_sphere(s, -1.),
             Intersection::ray_sphere(s, 1.),
         ];
         let h2 = Intersection::hit(&i2);
-        assert_eq!(&i2[1], h2.unwrap());
+        assert_eq!(1., h2.unwrap().t);
 
         // should return None when there is no non-negative t value
         let i3 = [
@@ -82,7 +70,7 @@ mod tests {
             Intersection::ray_sphere(s, -2.),
         ];
         let h3 = Intersection::hit(&i3);
-        assert_eq!(None, h3);
+        assert!(h3.is_none());
 
         // should sort entries before returning the first hit
         let i4 = [
@@ -92,6 +80,6 @@ mod tests {
             Intersection::ray_sphere(s, 2.),
         ];
         let h4 = Intersection::hit(&i4);
-        assert_eq!(&i4[3], h4.unwrap());
+        assert_eq!(2., h4.unwrap().t);
     }
 }

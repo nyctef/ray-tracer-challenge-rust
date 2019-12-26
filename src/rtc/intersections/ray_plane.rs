@@ -27,7 +27,7 @@ mod tests {
     fn ray_parallel_to_plane_misses() {
         let r = Ray::new(point(0., 1., 0.), vec(0., 0., 1.));
         let p = Plane::xz();
-        assert_eq!(Intersection::none(), p.ray_intersection(r));
+        assert_eq!(0, p.ray_intersection(r).len());
     }
 
     #[test]
@@ -38,7 +38,7 @@ mod tests {
 
         let r = Ray::new(point(0., 0., 0.), vec(0., 0., 1.));
         let p = Plane::xz();
-        assert_eq!(Intersection::none(), p.ray_intersection(r));
+        assert_eq!(0, p.ray_intersection(r).len());
     }
 
     #[test]
