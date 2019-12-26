@@ -91,18 +91,18 @@ mod tests {
     #[test]
     fn translating_points_should_move_them() {
         let transform = translation(5., -3., 2.);
-        let p = Tuple::point(-3., 4., 5.);
+        let p = point(-3., 4., 5.);
 
-        assert_eq!(Tuple::point(2., 1., 7.), transform * p);
+        assert_eq!(point(2., 1., 7.), transform * p);
 
         let inv = transform.try_inverse().unwrap();
-        assert_eq!(Tuple::point(-8., 7., 3.), inv * p);
+        assert_eq!(point(-8., 7., 3.), inv * p);
     }
 
     #[test]
     fn translating_vectors_should_not_change_them() {
         let transform = translation(5., -3., 2.);
-        let v = Tuple::vec(-3., 4., 5.);
+        let v = vec(-3., 4., 5.);
 
         assert_eq!(v, transform * v);
     }
@@ -110,22 +110,22 @@ mod tests {
     #[test]
     fn scaling_points_should_move_them() {
         let transform = scaling(2., 3., 4.);
-        let p = Tuple::point(-4., 6., 8.);
+        let p = point(-4., 6., 8.);
 
-        assert_eq!(Tuple::point(-8., 18., 32.), transform * p);
+        assert_eq!(point(-8., 18., 32.), transform * p);
     }
 
     #[test]
     fn scaling_vectors_should_resize_them() {
         let transform = scaling(2., 3., 4.);
-        let p = Tuple::vec(-4., 6., 8.);
+        let p = vec(-4., 6., 8.);
 
-        assert_eq!(Tuple::vec(-8., 18., 32.), transform * p)
+        assert_eq!(vec(-8., 18., 32.), transform * p)
     }
 
     #[test]
     fn rotation_around_x_axis() {
-        let p1 = Tuple::point(0., 1., 0.);
+        let p1 = point(0., 1., 0.);
 
         let half_quarter_x_rotation = rotation_x(PI / 4.);
         let quarter_x_rotation = rotation_x(PI / 2.);
@@ -133,26 +133,26 @@ mod tests {
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(0., half_root_2, half_root_2),
+            point(0., half_root_2, half_root_2),
             half_quarter_x_rotation * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(0., half_root_2, -half_root_2),
+            point(0., half_root_2, -half_root_2),
             (half_quarter_x_rotation.try_inverse().unwrap()) * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(0., 0., 1.),
+            point(0., 0., 1.),
             quarter_x_rotation * p1
         ));
     }
 
     #[test]
     fn rotation_around_y_axis() {
-        let p1 = Tuple::point(0., 0., 1.);
+        let p1 = point(0., 0., 1.);
 
         let half_quarter_y_rotation = rotation_y(PI / 4.);
         let quarter_y_rotation = rotation_y(PI / 2.);
@@ -160,26 +160,26 @@ mod tests {
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(half_root_2, 0., half_root_2),
+            point(half_root_2, 0., half_root_2),
             half_quarter_y_rotation * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(-half_root_2, 0., half_root_2),
+            point(-half_root_2, 0., half_root_2),
             half_quarter_y_rotation.try_inverse().unwrap() * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(1., 0., 0.),
+            point(1., 0., 0.),
             quarter_y_rotation * p1
         ));
     }
 
     #[test]
     fn rotation_around_z_axis() {
-        let p1 = Tuple::point(0., 1., 0.);
+        let p1 = point(0., 1., 0.);
 
         let half_quarter_z_rotation = rotation_z(PI / 4.);
         let quarter_z_rotation = rotation_z(PI / 2.);
@@ -187,19 +187,19 @@ mod tests {
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(-half_root_2, half_root_2, 0.),
+            point(-half_root_2, half_root_2, 0.),
             half_quarter_z_rotation * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(half_root_2, half_root_2, 0.),
+            point(half_root_2, half_root_2, 0.),
             half_quarter_z_rotation.try_inverse().unwrap() * p1
         ));
 
         assert!(approx_eq!(
             Tuple,
-            Tuple::point(-1., 0., 0.),
+            point(-1., 0., 0.),
             quarter_z_rotation * p1
         ));
     }
@@ -207,28 +207,28 @@ mod tests {
     #[test]
     fn shearing_moves_axes_in_proportion_to_each_other() {
         let t1 = shearing(1., 0., 0., 0., 0., 0.);
-        let p1 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(5., 3., 4.), t1 * p1);
+        let p1 = point(2., 3., 4.);
+        assert_eq!(point(5., 3., 4.), t1 * p1);
 
         let t2 = shearing(0., 1., 0., 0., 0., 0.);
-        let p2 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(6., 3., 4.), t2 * p2);
+        let p2 = point(2., 3., 4.);
+        assert_eq!(point(6., 3., 4.), t2 * p2);
 
         let t3 = shearing(0., 0., 1., 0., 0., 0.);
-        let p3 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 5., 4.), t3 * p3);
+        let p3 = point(2., 3., 4.);
+        assert_eq!(point(2., 5., 4.), t3 * p3);
 
         let t4 = shearing(0., 0., 0., 1., 0., 0.);
-        let p4 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 7., 4.), t4 * p4);
+        let p4 = point(2., 3., 4.);
+        assert_eq!(point(2., 7., 4.), t4 * p4);
 
         let t5 = shearing(0., 0., 0., 0., 1., 0.);
-        let p5 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 3., 6.), t5 * p5);
+        let p5 = point(2., 3., 4.);
+        assert_eq!(point(2., 3., 6.), t5 * p5);
 
         let t6 = shearing(0., 0., 0., 0., 0., 1.);
-        let p6 = Tuple::point(2., 3., 4.);
-        assert_eq!(Tuple::point(2., 3., 7.), t6 * p6);
+        let p6 = point(2., 3., 4.);
+        assert_eq!(point(2., 3., 7.), t6 * p6);
     }
 
     #[test]
@@ -236,9 +236,9 @@ mod tests {
         // the default view transform actually looks along the z axis in the negative direction-
         // adding a camera requires things to be flipped
         let vt = view_transform(
-            Tuple::point(0., 0., 0.),
-            Tuple::point(0., 0., -1.),
-            Tuple::vec(0., 1., 0.),
+            point(0., 0., 0.),
+            point(0., 0., -1.),
+            vec(0., 1., 0.),
         );
         assert_eq!(Matrix4::identity(), vt);
     }
@@ -246,9 +246,9 @@ mod tests {
     #[test]
     fn view_transform_for_positive_z_axis_direction() {
         let vt = view_transform(
-            Tuple::point(0., 0., 0.),
-            Tuple::point(0., 0., 1.),
-            Tuple::vec(0., 1., 0.),
+            point(0., 0., 0.),
+            point(0., 0., 1.),
+            vec(0., 1., 0.),
         );
         // now we flip the z and x axes
         assert_eq!(scaling(-1., 1., -1.), vt);
@@ -257,9 +257,9 @@ mod tests {
     #[test]
     fn the_view_transform_moves_the_world() {
         let vt = view_transform(
-            Tuple::point(0., 0., 8.),
-            Tuple::point(0., 0., 0.),
-            Tuple::vec(0., 1., 0.),
+            point(0., 0., 8.),
+            point(0., 0., 0.),
+            vec(0., 1., 0.),
         );
         // if the camera is at z=8, then we shift the whole world -8 on z axis to put the camera at the origin
         assert_eq!(translation(0., 0., -8.), vt);
@@ -269,9 +269,9 @@ mod tests {
     fn an_arbitrary_view_transform() {
         // example from book
         let vt = view_transform(
-            Tuple::point(1., 3., 2.),
-            Tuple::point(4., -2., 8.),
-            Tuple::vec(1., 1., 0.),
+            point(1., 3., 2.),
+            point(4., -2., 8.),
+            vec(1., 1., 0.),
         );
         let expected = Matrix4::new(
             -0.50709, 0.50709, 0.67612, -2.36643, //

@@ -16,22 +16,22 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
     let mut right_wall = Plane::xz();
     right_wall.transformation = translation(0., 0., 5.) * rotation_y(PI / 4.) * rotation_x(PI / 2.);
 
-    let mut middle_sphere = Sphere::pos_r(Tuple::point(-1.5, 1., 0.5), 1.);
+    let mut middle_sphere = Sphere::pos_r(point(-1.5, 1., 0.5), 1.);
     middle_sphere.material.color = Color::new(0.1, 1., 0.5);
     middle_sphere.material.diffuse = 0.7;
     middle_sphere.material.specular = 0.3;
 
-    let mut right_sphere = Sphere::pos_r(Tuple::point(1.5, 0.5, -0.5), 0.5);
+    let mut right_sphere = Sphere::pos_r(point(1.5, 0.5, -0.5), 0.5);
     right_sphere.material.color = Color::new(0.5, 1., 0.1);
     right_sphere.material.diffuse = 0.7;
     right_sphere.material.specular = 0.3;
 
-    let mut left_sphere = Sphere::pos_r(Tuple::point(-1.5, 0.33, -0.75), 0.33);
+    let mut left_sphere = Sphere::pos_r(point(-1.5, 0.33, -0.75), 0.33);
     left_sphere.material.color = Color::new(1., 0.8, 1.);
     left_sphere.material.diffuse = 0.7;
     left_sphere.material.specular = 0.7;
 
-    let light = PointLight::new(Color::white(), Tuple::point(-10., 10., -10.));
+    let light = PointLight::new(Color::white(), point(-10., 10., -10.));
 
     let world = World::new(
         vec![
@@ -48,11 +48,7 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
         resolution,
         resolution,
         PI / 3.,
-        view_transform(
-            Tuple::point(0., 1.5, -5.),
-            Tuple::point(0., 1., 0.),
-            Tuple::vec(0., 1., 0.),
-        ),
+        view_transform(point(0., 1.5, -5.), point(0., 1., 0.), vec(0., 1., 0.)),
     );
 
     (world, camera)

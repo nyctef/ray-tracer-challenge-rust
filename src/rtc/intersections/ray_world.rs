@@ -21,7 +21,7 @@ mod tests {
     #[test]
     fn intersection_with_default_world() {
         let w = &World::default();
-        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vec(0., 0., 1.));
+        let r = Ray::new(point(0., 0., -5.), vec(0., 0., 1.));
         let intersections = w.ray_intersection(r);
 
         assert_eq!(4, intersections.len());

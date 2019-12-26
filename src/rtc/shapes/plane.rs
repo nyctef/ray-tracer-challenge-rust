@@ -28,7 +28,7 @@ impl Shape for Plane {
     }
 
     fn local_normal_at(&self, _point: Tuple) -> Tuple {
-        Tuple::vec(0., 1., 0.)
+        vec(0., 1., 0.)
     }
 }
 
@@ -38,17 +38,8 @@ mod tests {
     #[test]
     fn the_normal_of_a_plane_is_constant_everywhere() {
         let p = Plane::xz();
-        assert_eq!(
-            Tuple::vec(0., 1., 0.),
-            p.local_normal_at(Tuple::point(0., 0., 0.))
-        );
-        assert_eq!(
-            Tuple::vec(0., 1., 0.),
-            p.local_normal_at(Tuple::point(1., 2., 3.))
-        );
-        assert_eq!(
-            Tuple::vec(0., 1., 0.),
-            p.local_normal_at(Tuple::point(10., 10., 10.,))
-        );
+        assert_eq!(vec(0., 1., 0.), p.local_normal_at(point(0., 0., 0.)));
+        assert_eq!(vec(0., 1., 0.), p.local_normal_at(point(1., 2., 3.)));
+        assert_eq!(vec(0., 1., 0.), p.local_normal_at(point(10., 10., 10.,)));
     }
 }

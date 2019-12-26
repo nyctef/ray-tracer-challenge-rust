@@ -65,8 +65,8 @@ impl Camera {
             .try_inverse()
             .expect("Panic! Camera transform can't be inverted!");
 
-        let pixel_pos = camera_to_world * Tuple::point(pixel_world_x, pixel_world_y, -1.);
-        let origin = camera_to_world * Tuple::point(0., 0., 0.);
+        let pixel_pos = camera_to_world * point(pixel_world_x, pixel_world_y, -1.);
+        let origin = camera_to_world * point(0., 0., 0.);
         let direction = (pixel_pos - origin).normalize();
 
         Ray::new(origin, direction)
@@ -103,10 +103,7 @@ mod tests {
     fn ray_for_pixel_at_center() {
         let c = Camera::from_size(201, 101, PI / 2.);
         let r = c.ray_for_pixel(100, 50);
-        assert_ray_eq!(
-            Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., -1.)),
-            r
-        );
+        assert_ray_eq!(Ray::new(point(0., 0., 0.), vec(0., 0., -1.)), r);
     }
 
     #[test]
@@ -114,10 +111,7 @@ mod tests {
         let c = Camera::from_size(201, 101, PI / 2.);
         let r = c.ray_for_pixel(0, 0);
         assert_ray_eq!(
-            Ray::new(
-                Tuple::point(0., 0., 0.),
-                Tuple::vec(0.66519, 0.33259, -0.66851)
-            ),
+            Ray::new(point(0., 0., 0.), vec(0.66519, 0.33259, -0.66851)),
             r,
             epsilon = 0.00001
         );
@@ -129,9 +123,6 @@ mod tests {
         c.view_transform = rotation_y(PI / 4.) * translation(0., -2., 5.);
         let r = c.ray_for_pixel(100, 50);
         let s22 = 2_f32.sqrt() / 2.;
-        assert_ray_eq!(
-            Ray::new(Tuple::point(0., 2., -5.), Tuple::vec(s22, 0., -s22)),
-            r
-        );
+        assert_ray_eq!(Ray::new(point(0., 2., -5.), vec(s22, 0., -s22)), r);
     }
 }

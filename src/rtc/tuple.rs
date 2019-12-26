@@ -21,14 +21,6 @@ impl Tuple {
         }
     }
 
-    pub fn point(x: f32, y: f32, z: f32) -> Tuple {
-        Tuple::new(x, y, z, 1.0)
-    }
-
-    pub fn vec(x: f32, y: f32, z: f32) -> Tuple {
-        Tuple::new(x, y, z, 0.0)
-    }
-
     pub fn is_point(&self) -> bool {
         // TODO: should we be forcing w back to exactly 0 / 1?
         // approx_eq!(1.0, self.w) // TODO
@@ -54,12 +46,20 @@ impl Tuple {
 
     pub fn cross(&self, other: &Tuple) -> Tuple {
         // only implementing 3d version
-        Tuple::vec(
+        vec(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
     }
+}
+
+pub fn point(x: f32, y: f32, z: f32) -> Tuple {
+    Tuple::new(x, y, z, 1.0)
+}
+
+pub fn vec(x: f32, y: f32, z: f32) -> Tuple {
+    Tuple::new(x, y, z, 0.0)
 }
 
 impl PartialEq for Tuple {
@@ -102,11 +102,11 @@ mod tests {
 
     #[test]
     fn tuple_creation() {
-        let a = Tuple::point(4.3, -4.2, 3.1);
+        let a = point(4.3, -4.2, 3.1);
         assert!(a.is_point());
         assert!(!a.is_vec());
 
-        let b = Tuple::vec(4.3, -4.2, 3.1);
+        let b = vec(4.3, -4.2, 3.1);
         assert!(!b.is_point());
         assert!(b.is_vec());
     }
@@ -117,8 +117,8 @@ mod tests {
         // for some reason 0.1+0.2==0.3 works in rust
         let x: f32 = 0.15 + 0.15 + 0.15;
         let y: f32 = 0.1 + 0.1 + 0.25;
-        let a = Tuple::point(x, x, x);
-        let b = Tuple::point(y, y, y);
+        let a = point(x, x, x);
+        let b = point(y, y, y);
 
         assert_ne!(a, b);
         assert!(approx_eq!(Tuple, a, b))
@@ -135,21 +135,18 @@ mod tests {
 
     #[test]
     fn subtracting_tuples() {
-        let a = Tuple::point(3.0, 2.0, 1.0);
-        let b = Tuple::point(5.0, 6.0, 7.0);
+        let a = point(3.0, 2.0, 1.0);
+        let b = point(5.0, 6.0, 7.0);
 
         // subtracting two points gives a vector
-        assert_eq!(Tuple::vec(-2.0, -4.0, -6.0), a - b)
+        assert_eq!(vec(-2.0, -4.0, -6.0), a - b)
     }
 
     #[test]
     fn negating_tuples() {
         // negating a tuple doesn't negate the w value
-        assert_eq!(
-            -Tuple::point(1.0, 2.0, 3.0),
-            Tuple::new(-1.0, -2.0, -3.0, -1.0)
-        );
-        assert_eq!(-Tuple::vec(1.0, 2.0, 3.0), Tuple::vec(-1.0, -2.0, -3.0));
+        assert_eq!(-point(1.0, 2.0, 3.0), Tuple::new(-1.0, -2.0, -3.0, -1.0));
+        assert_eq!(-vec(1.0, 2.0, 3.0), vec(-1.0, -2.0, -3.0));
     }
 
     #[test]
@@ -163,19 +160,19 @@ mod tests {
 
     #[test]
     fn tuple_magnitude() {
-        assert_eq!(1.0, Tuple::vec(1.0, 0.0, 0.0).magnitude());
-        assert_eq!(1.0, Tuple::vec(0.0, 1.0, 0.0).magnitude());
-        assert_eq!(1.0, Tuple::vec(0.0, 0.0, 1.0).magnitude());
-        assert_eq!(1.0, Tuple::point(0.0, 0.0, 1.0).magnitude());
+        assert_eq!(1.0, vec(1.0, 0.0, 0.0).magnitude());
+        assert_eq!(1.0, vec(0.0, 1.0, 0.0).magnitude());
+        assert_eq!(1.0, vec(0.0, 0.0, 1.0).magnitude());
+        assert_eq!(1.0, point(0.0, 0.0, 1.0).magnitude());
 
-        assert_eq!(14.0_f32.sqrt(), Tuple::vec(1.0, 2.0, 3.0).magnitude());
-        assert_eq!(14.0_f32.sqrt(), Tuple::vec(-1.0, -2.0, -3.0).magnitude());
+        assert_eq!(14.0_f32.sqrt(), vec(1.0, 2.0, 3.0).magnitude());
+        assert_eq!(14.0_f32.sqrt(), vec(-1.0, -2.0, -3.0).magnitude());
     }
 
     #[test]
     fn vector_normalization() {
-        let a = Tuple::vec(1.0, 1.0, 1.0);
-        let b = Tuple::vec(1.0, 2.0, 3.0);
+        let a = vec(1.0, 1.0, 1.0);
+        let b = vec(1.0, 2.0, 3.0);
 
         assert!(approx_eq!(f32, 1.0, a.normalize().magnitude()));
         assert!(approx_eq!(f32, 1.0, b.normalize().magnitude()));
@@ -183,18 +180,18 @@ mod tests {
 
     #[test]
     fn vector_dot_product() {
-        let a = Tuple::vec(1.0, 2.0, 3.0);
-        let b = Tuple::vec(2.0, 3.0, 4.0);
+        let a = vec(1.0, 2.0, 3.0);
+        let b = vec(2.0, 3.0, 4.0);
 
         assert_eq!(20.0, Tuple::dot(a, b))
     }
 
     #[test]
     fn vector_cross_product() {
-        let a = Tuple::vec(1.0, 2.0, 3.0);
-        let b = Tuple::vec(2.0, 3.0, 4.0);
+        let a = vec(1.0, 2.0, 3.0);
+        let b = vec(2.0, 3.0, 4.0);
 
-        assert_eq!(Tuple::vec(-1.0, 2.0, -1.0), Tuple::cross(&a, &b));
-        assert_eq!(Tuple::vec(1.0, -2.0, 1.0), Tuple::cross(&b, &a));
+        assert_eq!(vec(-1.0, 2.0, -1.0), Tuple::cross(&a, &b));
+        assert_eq!(vec(1.0, -2.0, 1.0), Tuple::cross(&b, &a));
     }
 }

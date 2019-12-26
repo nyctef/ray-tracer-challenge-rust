@@ -25,7 +25,7 @@ mod tests {
 
     #[test]
     fn ray_parallel_to_plane_misses() {
-        let r = Ray::new(Tuple::point(0., 1., 0.), Tuple::vec(0., 0., 1.));
+        let r = Ray::new(point(0., 1., 0.), vec(0., 0., 1.));
         let p = Plane::xz();
         assert_eq!(Intersection::none(), p.ray_intersection(r));
     }
@@ -36,17 +36,14 @@ mod tests {
         // but since the plan is infinitely thin, if we actually looked down
         // the ray then we wouldn't see anything.
 
-        let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vec(0., 0., 1.));
+        let r = Ray::new(point(0., 0., 0.), vec(0., 0., 1.));
         let p = Plane::xz();
         assert_eq!(Intersection::none(), p.ray_intersection(r));
     }
 
     #[test]
     fn ray_hitting_plane_from_above_hits() {
-        let r = Ray::new(
-            Tuple::point(-1., 1., -1.),
-            Tuple::vec(1., -1., 1.).normalize(),
-        );
+        let r = Ray::new(point(-1., 1., -1.), vec(1., -1., 1.).normalize());
         let p = Plane::xz();
         let s33 = 3_f32.sqrt();
         let intersection = p.ray_intersection(r)[0];
