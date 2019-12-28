@@ -9,14 +9,14 @@ pub trait SamplePattern {
 // this enum/impl pair means we can put Pattern directly into a struct
 // without having to worry about boxing+lifetimes or trait objects.
 // see https://users.rust-lang.org/t/11957 for inspiration + some discussion on this idea
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Pattern {
     Solid(SolidColor),
     Stripe(Stripe),
 }
 impl SamplePattern for Pattern {
     fn sample_pattern_at(&self, p: Tuple) -> Color {
-        match *self {
+        match self {
             Pattern::Solid(s) => s.sample_pattern_at(p),
             Pattern::Stripe(s) => s.sample_pattern_at(p),
         }
@@ -46,10 +46,10 @@ impl SamplePattern for SolidColor {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Stripe {
-    a: Color,
-    b: Color,
+    a: Box<Pattern>,
+    b: Box<Pattern>,
     // transformation from object space to pattern space
     object_to_pattern: Matrix4,
 }
@@ -61,8 +61,8 @@ impl Stripe {
             .expect("Stripe transform needs to be invertible");
 
         Stripe {
-            a,
-            b,
+            a: Box::new(solid(a)),
+            b: Box::new(solid(b)),
             object_to_pattern,
         }
     }
@@ -77,9 +77,9 @@ impl SamplePattern for Stripe {
         let p2 = self.object_to_pattern * p;
 
         if p2.x.floor() % 2. == 0. {
-            self.a
+            self.a.sample_pattern_at(p2)
         } else {
-            self.b
+            self.b.sample_pattern_at(p2)
         }
     }
 }

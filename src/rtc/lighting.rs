@@ -15,7 +15,7 @@ impl PointLight {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PhongMaterial {
     pub pattern: Pattern,
     pub ambient: f32,
@@ -49,20 +49,20 @@ impl Default for PhongMaterial {
 }
 
 #[derive(Debug, Clone)]
-struct LightHit {
+struct LightHit<'a> {
     pub world_point: Tuple,
     pub object_point: Tuple,
     // a point slightly above the surface in world space, used to cast shadow rays
     pub over_point: Tuple,
     pub surface_normal: Tuple,
     pub to_eye: Tuple,
-    pub material: PhongMaterial,
+    pub material: &'a PhongMaterial,
     // whether the light ray hit the inside surface of the object.
     // in this case surface_normal is reversed to provide a useful value
     pub inside: bool,
 }
 
-fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
+fn prepare_computations<'a>(hit: Intersection<'a>, ray: Ray) -> Option<LightHit<'a>> {
     let world_point = ray.position(hit.t);
     let object_point = hit.obj.world_to_object() * world_point;
 
@@ -94,14 +94,24 @@ fn prepare_computations(hit: &Intersection, ray: Ray) -> Option<LightHit> {
     })
 }
 
-fn light_ray(world: &World, ray: Ray) -> Option<LightHit> {
-    let intersects = world.ray_intersection(ray);
-    let hit = Intersection::hit(&intersects)?;
+fn light_ray<'a>(world: &'a World, ray: Ray) -> Option<LightHit<'a>> {
+    // TODO: HACK: this inlines a bunch of methods (World.ray_intersection, Intersection::hit, etc)
+    // since I can't figure out how to tell the borrow checker that those methods are doing the right thing.
+
+    let mut result = Vec::<Intersection>::new();
+    for obj in &world.objects {
+        let intersection = obj.ray_intersection(ray);
+        result.extend_from_slice(&intersection);
+    }
+    result.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Equal));
+
+    let hit = result.into_iter().filter(|a| a.t >= 0.).next()?;
+
     prepare_computations(hit, ray)
 }
 
 fn lighting(
-    material: PhongMaterial,
+    material: &PhongMaterial,
     light: PointLight,
     world_point: Tuple,
     object_point: Tuple,
@@ -205,7 +215,7 @@ mod tests {
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., -10.));
         let result = lighting(
-            material,
+            &material,
             light,
             surface_position,
             surface_position,
@@ -226,7 +236,7 @@ mod tests {
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., -10.));
         let result = lighting(
-            material,
+            &material,
             light,
             surface_position,
             surface_position,
@@ -246,7 +256,7 @@ mod tests {
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 10., -10.));
         let result = lighting(
-            material,
+            &material,
             light,
             surface_position,
             surface_position,
@@ -267,7 +277,7 @@ mod tests {
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 10., -10.));
         let result = lighting(
-            material,
+            &material,
             light,
             surface_position,
             surface_position,
@@ -294,7 +304,7 @@ mod tests {
         let normal = vec(0., 0., -1.);
         let light = PointLight::new(white(), point(0., 0., 10.));
         let result = lighting(
-            material,
+            &material,
             light,
             surface_position,
             surface_position,
@@ -311,7 +321,7 @@ mod tests {
         let r = Ray::new(point(0., 0., -5.), vec(0., 0., 1.));
         let shape = &Sphere::unit();
         let hit = Intersection::ray_sphere(shape, 4.);
-        let intersection = prepare_computations(&hit, r).unwrap();
+        let intersection = prepare_computations(hit, r).unwrap();
 
         assert_eq!(vec(0., 0., -1.), intersection.surface_normal);
         assert_eq!(false, intersection.inside);
@@ -322,7 +332,7 @@ mod tests {
         let r = Ray::new(point(0., 0., 0.), vec(0., 0., 1.));
         let shape = &Sphere::unit();
         let hit = Intersection::ray_sphere(shape, 1.);
-        let intersection = prepare_computations(&hit, r).unwrap();
+        let intersection = prepare_computations(hit, r).unwrap();
 
         // since we're hitting the +ve z side of the sphere, the outside normal is (0,0,+1)
         // but it's inverted since we're hitting the inside
@@ -387,7 +397,7 @@ mod tests {
         let light = PointLight::new(white(), point(0., 0., -10.));
         let is_shadow = true;
         let result = lighting(
-            material,
+            &material,
             light,
             surface_position,
             surface_position,

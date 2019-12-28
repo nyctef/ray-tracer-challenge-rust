@@ -8,7 +8,7 @@ pub use self::plane::*;
 pub trait Shape: std::fmt::Debug {
     // transformation matrix for world space -> Shape's local object space
     fn world_to_object(&self) -> Matrix4;
-    fn material(&self) -> PhongMaterial;
+    fn material(&self) -> &PhongMaterial;
     fn local_normal_at(&self, point: Tuple) -> Tuple;
     fn normal_at(&self, point: Tuple) -> Tuple {
         let world_to_object = self.world_to_object();

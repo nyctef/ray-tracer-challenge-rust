@@ -1,7 +1,7 @@
 use crate::*;
 
 impl RayIntersection for &World {
-    fn ray_intersection<'a>(&'a self, ray: Ray) -> Vec<Intersection<'a>> {
+    fn ray_intersection(&self, ray: Ray) -> Vec<Intersection> {
         let mut result = Vec::<Intersection>::new();
 
         for obj in &self.objects {

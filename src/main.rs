@@ -15,7 +15,7 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
 
     let mut left_wall =
         Plane::t(translation(0., 0., 5.) * rotation_y(-PI / 4.) * rotation_x(PI / 2.));
-    left_wall.material = floor.material;
+    left_wall.material = floor.material.clone();
     left_wall.material.pattern = Pattern::Stripe(Stripe::col(red(), white()));
 
     let mut right_wall =

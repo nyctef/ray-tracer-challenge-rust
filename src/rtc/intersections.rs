@@ -11,7 +11,7 @@ use std::cmp::Ordering::Equal;
 #[derive(Debug, Clone, Copy)]
 pub struct Intersection<'a> {
     pub t: f32,
-    pub obj: &'a (dyn Shape),
+    pub obj: &'a dyn Shape,
 }
 
 impl Intersection<'_> {
@@ -27,9 +27,9 @@ impl Intersection<'_> {
         Intersection { t, obj: plane }
     }
 
-    pub fn hit<'a>(intersections: &'a [Intersection]) -> Option<&'a Intersection<'a>> {
+    pub fn hit<'a>(intersections: &'a [Intersection<'a>]) -> Option<&'a Intersection<'a>> {
         let mut sorted = intersections
-            .iter()
+            .into_iter()
             .filter(|a| a.t >= 0.)
             .collect::<Vec<_>>();
 

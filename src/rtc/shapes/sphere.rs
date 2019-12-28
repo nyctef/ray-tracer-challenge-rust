@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Sphere {
     world_to_object: Matrix4,
     pub material: PhongMaterial,
@@ -44,8 +44,8 @@ impl Shape for Sphere {
     fn world_to_object(&self) -> Matrix4 {
         self.world_to_object
     }
-    fn material(&self) -> PhongMaterial {
-        self.material
+    fn material(&self) -> &PhongMaterial {
+        &self.material
     }
 
     fn local_normal_at(&self, p: Tuple) -> Tuple {
