@@ -11,7 +11,7 @@ use std::cmp::Ordering::Equal;
 #[derive(Debug, Clone, Copy)]
 pub struct Intersection<'a> {
     pub t: f32,
-    pub obj: &'a (dyn Shape + 'a),
+    pub obj: &'a (dyn Shape),
 }
 
 impl Intersection<'_> {
