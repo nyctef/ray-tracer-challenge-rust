@@ -81,8 +81,7 @@ impl Canvas for SdlCanvas<'_> {
     }
 }
 
-fn main() {
-    let resolution: usize = 500;
+fn draw_to_screen(resolution: usize, camera: &Camera, world: &World) {
     let sdl = sdl2::init().unwrap();
     let video = sdl.video().unwrap();
     let window = video
@@ -90,10 +89,8 @@ fn main() {
         .build()
         .unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
-
-    let (world, camera) = create_scene_2(resolution);
     let mut c = SdlCanvas(&mut canvas);
-    camera.render_to(&world, &mut c);
+    camera.render_to(world, &mut c);
     c.present();
 
     let mut event_pump = sdl.event_pump().unwrap();
@@ -104,6 +101,15 @@ fn main() {
                 _ => {}
             }
         }
+    }
+}
+
+fn main() {
+    let resolution: usize = 500;
+    let (world, camera) = create_scene_2(resolution);
+
+    if false {
+        draw_to_screen(resolution, &camera, &world)
     }
 
     let mut png_canvas = PngCanvas::new(resolution, resolution);
