@@ -1,4 +1,5 @@
 use crate::*;
+use std::f32::consts::PI;
 
 // TODO: try out trait vs enum when looking into performance work -
 // how much of a difference does it make? (check for Shape as well)
@@ -16,6 +17,7 @@ pub enum Pattern {
     Gradient(Gradient),
     Ring(Ring),
     Checkerboard(Checkerboard),
+    SphereMap(SphereMap),
 }
 impl SamplePattern for Pattern {
     fn sample_pattern_at(&self, p: Tuple) -> Color {
@@ -25,6 +27,7 @@ impl SamplePattern for Pattern {
             Pattern::Gradient(g) => g.sample_pattern_at(p),
             Pattern::Ring(r) => r.sample_pattern_at(p),
             Pattern::Checkerboard(c) => c.sample_pattern_at(p),
+            Pattern::SphereMap(s) => s.sample_pattern_at(p),
         }
     }
 }
@@ -195,6 +198,49 @@ impl SamplePattern for Checkerboard {
         } else {
             self.b
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SphereMap {
+    a: Box<Pattern>,
+    // transformation from object space to pattern space
+    object_to_pattern: Matrix4,
+}
+impl SphereMap {
+    pub fn new(a: Pattern, transform: Matrix4) -> SphereMap {
+        let object_to_pattern = transform
+            .try_inverse()
+            .expect("Stripe transform needs to be invertible");
+
+        SphereMap {
+            a: Box::new(a),
+            object_to_pattern,
+        }
+    }
+
+    pub fn col(a: Pattern) -> SphereMap {
+        SphereMap::new(a, Matrix4::identity())
+    }
+}
+impl SamplePattern for SphereMap {
+    fn sample_pattern_at(&self, p: Tuple) -> Color {
+        let p2 = self.object_to_pattern * p;
+
+        // based on https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere
+        // Assuming we have a sphere with y pointing up:
+        //   arctan2(z, x) gives us the angle from the positive x axis around the y axis
+        //   arcsin(y) gives us the angle above or below the xz plane
+        // I think this assumes p2 is a point on the unit sphere
+        //   (since otherwise we'd need to divide y by the
+        //    hypotenuse for the correct value to put in asin())
+
+        // TODO: we should divide by 2PI here, but PI appears to produce squares on the output sphere
+        // - is this what we expect?
+        let u = 0.5 + (p2.z.atan2(p2.x) / (PI));
+        let v = 0.5 - (p2.y.asin() / PI);
+
+        self.a.sample_pattern_at(point(u, v, 0.))
     }
 }
 
