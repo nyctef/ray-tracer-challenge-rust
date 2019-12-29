@@ -235,9 +235,7 @@ impl SamplePattern for SphereMap {
         //   (since otherwise we'd need to divide y by the
         //    hypotenuse for the correct value to put in asin())
 
-        // TODO: we should divide by 2PI here, but PI appears to produce squares on the output sphere
-        // - is this what we expect?
-        let u = 0.5 + (p2.z.atan2(p2.x) / (PI));
+        let u = 0.5 + (p2.z.atan2(p2.x) / (2. * PI));
         let v = 0.5 - (p2.y.asin() / PI);
 
         self.a.sample_pattern_at(point(u, v, 0.))

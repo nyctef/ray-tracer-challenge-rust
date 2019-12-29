@@ -27,7 +27,7 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
         Pattern::SphereMap(SphereMap::col(Pattern::Checkerboard(Checkerboard::new(
             black(),
             Color::new(0.85, 0.9, 1.1),
-            scaling(0.05, 0.05, 0.05),
+            scaling(0.025, 0.05, 1.),
         ))));
     middle_sphere.material.diffuse = 0.7;
     middle_sphere.material.specular = 0.3;
