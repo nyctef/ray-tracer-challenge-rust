@@ -27,3 +27,5 @@ mod camera;
 pub use self::camera::*;
 mod patterns;
 pub use self::patterns::*;
+mod perlin;
+pub use self::perlin::*;

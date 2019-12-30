@@ -18,6 +18,7 @@ pub enum Pattern {
     Ring(Ring),
     Checkerboard(Checkerboard),
     SphereMap(SphereMap),
+    Perlin(PerlinNoise),
 }
 impl SamplePattern for Pattern {
     fn sample_pattern_at(&self, p: Tuple) -> Color {
@@ -28,6 +29,7 @@ impl SamplePattern for Pattern {
             Pattern::Ring(r) => r.sample_pattern_at(p),
             Pattern::Checkerboard(c) => c.sample_pattern_at(p),
             Pattern::SphereMap(s) => s.sample_pattern_at(p),
+            Pattern::Perlin(s) => s.sample_pattern_at(p),
         }
     }
 }
@@ -247,6 +249,32 @@ impl SamplePattern for SphereMap {
         let v = 0.5 - (p2.y.asin() / PI);
 
         self.a.sample_pattern_at(point(u, v, 0.))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PerlinNoise {
+    // transformation from object space to pattern space
+    object_to_pattern: Matrix4,
+}
+impl PerlinNoise {
+    pub fn new(transform: Matrix4) -> PerlinNoise {
+        let object_to_pattern = transform
+            .try_inverse()
+            .expect("Stripe transform needs to be invertible");
+
+        PerlinNoise { object_to_pattern }
+    }
+
+    pub fn col() -> PerlinNoise {
+        PerlinNoise::new(Matrix4::identity())
+    }
+}
+impl SamplePattern for PerlinNoise {
+    fn sample_pattern_at(&self, p: Tuple) -> Color {
+        let p2 = self.object_to_pattern * p;
+
+        grey(perlin(p2.x, p2.y, p2.z))
     }
 }
 
