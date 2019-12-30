@@ -5,11 +5,23 @@ extern crate sdl2;
 use std::f32::consts::PI;
 
 fn create_scene_2(resolution: usize) -> (World, Camera) {
+    let red_stripes = Pattern::Stripe(Stripe::new(
+        red() * 0.9,
+        red() * 0.5,
+        scaling(0.1, 0.1, 0.1),
+    ));
+
+    let black_stripes = Pattern::Stripe(Stripe::new(
+        white() * 0.3,
+        white() * 0.1,
+        rotation_y(PI / 2.) * scaling(0.1, 0.1, 0.1),
+    ));
+
     let mut floor = Plane::xz();
-    floor.material.pattern = Pattern::Stripe(Stripe::new(
-        red(),
-        white(),
-        rotation_y(PI / 4.) * scaling(0.1, 0.1, 0.1),
+    floor.material.pattern = Pattern::Checkerboard(Checkerboard::new(
+        red_stripes,
+        black_stripes,
+        scaling(0.5, 0.5, 0.5),
     ));
     floor.material.specular = 0.;
 
@@ -25,8 +37,8 @@ fn create_scene_2(resolution: usize) -> (World, Camera) {
     let mut middle_sphere = Sphere::pos_r(point(-1.5, 1., 0.5), 1.);
     middle_sphere.material.pattern =
         Pattern::SphereMap(SphereMap::col(Pattern::Checkerboard(Checkerboard::new(
-            black(),
-            Color::new(0.85, 0.9, 1.1),
+            solid(black()),
+            solid(Color::new(0.85, 0.9, 1.1)),
             scaling(0.025, 0.05, 1.),
         ))));
     middle_sphere.material.diffuse = 0.7;

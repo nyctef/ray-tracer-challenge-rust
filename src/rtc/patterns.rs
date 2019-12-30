@@ -8,7 +8,7 @@ pub trait SamplePattern {
 }
 
 // this enum/impl pair means we can put Pattern directly into a struct
-// without having to worry about boxing+lifetimes or trait objects.
+// without having to worry about trait objects or lifetimes (hopefully!).
 // see https://users.rust-lang.org/t/11957 for inspiration + some discussion on this idea
 #[derive(Debug, Clone, PartialEq)]
 pub enum Pattern {
@@ -164,39 +164,47 @@ impl SamplePattern for Ring {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Checkerboard {
-    a: Color,
-    b: Color,
+    a: Box<Pattern>,
+    b: Box<Pattern>,
     // transformation from object space to pattern space
     object_to_pattern: Matrix4,
 }
 impl Checkerboard {
-    pub fn new(a: Color, b: Color, transform: Matrix4) -> Checkerboard {
+    pub fn new(a: Pattern, b: Pattern, transform: Matrix4) -> Checkerboard {
         let object_to_pattern = transform
             .try_inverse()
             .expect("Stripe transform needs to be invertible");
 
         Checkerboard {
-            a,
-            b,
+            a: Box::new(a),
+            b: Box::new(b),
             object_to_pattern,
         }
     }
 
     pub fn col(a: Color, b: Color) -> Checkerboard {
-        Checkerboard::new(a, b, Matrix4::identity())
+        Checkerboard::new(
+            Pattern::Solid(SolidColor::new(a)),
+            Pattern::Solid(SolidColor::new(b)),
+            Matrix4::identity(),
+        )
     }
 }
 impl SamplePattern for Checkerboard {
     fn sample_pattern_at(&self, p: Tuple) -> Color {
-        let p2 = self.object_to_pattern * p;
+        let mut p2 = self.object_to_pattern * p;
+        // HACK: since we might want to draw planes that are exactly aligned with a checkerboard boundary
+        // (eg the xy plane) but this causes speckles due to float imprecision
+        // therefore add an epsilon so that (0,0,0) is firmly within one of the checkerboard cells
+        p2 = p2 + vec(0.0001, 0.0001, 0.0001);
 
         let fac = p2.x.floor() + p2.y.floor() + p2.z.floor();
         if fac % 2. == 0. {
-            self.a
+            self.a.sample_pattern_at(p2)
         } else {
-            self.b
+            self.b.sample_pattern_at(p2)
         }
     }
 }
