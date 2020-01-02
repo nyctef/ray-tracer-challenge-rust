@@ -24,7 +24,8 @@ RUN apt-get update \
     && apt-get -y install git iproute2 procps lsb-release \
     #
     # Install lldb, vadimcn.vscode-lldb VSCode extension dependencies
-    && apt-get install -y lldb python3-minimal libpython3.7 \
+    # plus app dependencies (cmake and libsndio are required to build sdl2)
+    && apt-get install -y lldb python3-minimal libpython3.7 cmake libsndio-dev \
     #
     # Install Rust components
     && rustup update \
